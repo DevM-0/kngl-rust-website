@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="KNGL RUST - En iyi klipler">
+    <title>KNGL RUST - Klipler</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=block" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #0a0a0a; --bg-card: #151515; --bg-card-hover: #1c1c1c;
+            --rust-orange: #cd412b; --rust-orange-light: #e85d3a;
+            --text-primary: #f0ece4; --text-secondary: #9a9a9a; --text-tertiary: #666;
+            --border-card: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+        }
+        body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; min-height: 100vh; }
+        
+        /* Navbar */
+        .navbar { position: fixed; top: 0; left: 0; right: 0; height: 72px; background: rgba(10,10,10,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; display: flex; align-items: center; }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 0 32px; width: 100%; display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 3px; text-decoration: none; display: flex; gap: 8px; }
+        .nav-logo .white { color: #fff; }
+        .nav-logo .orange { color: var(--rust-orange); }
+        .back-btn { color: var(--text-secondary); text-decoration: none; font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 1rem; letter-spacing: 1px; padding: 8px 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; transition: all 0.3s; }
+        .back-btn:hover { border-color: var(--rust-orange); color: var(--rust-orange); }
+        
+        /* Main Content */
+        .main { max-width: 1400px; margin: 0 auto; padding: 100px 32px 60px; }
+        .page-header { margin-bottom: 40px; }
+        .section-tag { font-family: 'Rajdhani', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; color: var(--rust-orange); margin-bottom: 8px; display: block; }
+        .section-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.5rem, 5vw, 4rem); letter-spacing: 3px; color: var(--text-primary); }
+        
+        /* Search */
+        .search-bar { display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; }
+        .search-input { flex: 1; min-width: 250px; padding: 12px 20px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-card); border-radius: 10px; color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.3s; }
+        .search-input:focus { border-color: var(--rust-orange); }
+        .search-input::placeholder { color: var(--text-tertiary); }
+        .clip-count { display: flex; align-items: center; gap: 8px; background: rgba(205,65,43,0.15); border: 1px solid rgba(205,65,43,0.3); padding: 8px 16px; border-radius: 8px; color: var(--rust-orange); font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 0.9rem; }
+        
+        /* Clips Grid */
+        .clips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; }
+        .clip-card { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 14px; overflow: hidden; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; text-decoration: none; color: inherit; display: block; }
+        .clip-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 15px 40px rgba(0,0,0,0.5), 0 0 25px rgba(205,65,43,0.15); border-color: rgba(205,65,43,0.4); }
+        
+        /* Thumbnail */
+        .clip-thumbnail { position: relative; width: 100%; aspect-ratio: 16/9; overflow: hidden; background: #111; }
+        .clip-thumbnail img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .clip-card:hover .clip-thumbnail img { transform: scale(1.08); }
+        .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 56px; height: 56px; background: rgba(205,65,43,0.85); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s, transform 0.3s; }
+        .clip-card:hover .play-overlay { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        .play-overlay svg { width: 24px; height: 24px; fill: white; margin-left: 3px; }
+        .duration-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; font-family: 'Inter', sans-serif; }
+        
+        /* Card Info */
+        .clip-info { padding: 16px; }
+        .clip-title { font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .clip-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; color: var(--text-tertiary); font-size: 0.8rem; }
+        .clip-views svg { width: 14px; height: 14px; fill: var(--text-tertiary); vertical-align: middle; margin-right: 2px; }
+        .clip-channel { display: flex; align-items: center; gap: 10px; }
+        .clip-channel-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
+        .clip-channel-name { font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 0.95rem; color: var(--rust-orange-light); }
+        .clip-team-badge { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; background: rgba(205,65,43,0.2); color: var(--rust-orange); letter-spacing: 1px; margin-left: auto; }
+        
+        /* Empty State */
+        .empty-state { grid-column: 1 / -1; text-align: center; padding: 80px 20px; color: var(--text-tertiary); }
+        .empty-state h3 { font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; margin-bottom: 8px; color: var(--text-secondary); }
+        
+        /* Loading */
+        .loading { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; padding: 60px 0; gap: 16px; }
+        .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--rust-orange); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .clips-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .clip-info { padding: 10px; }
+            .clip-title { font-size: 0.9rem; }
+            .clip-channel-name { font-size: 0.8rem; }
+            .main { padding: 90px 16px 40px; }
+        }
+        @media (max-width: 480px) {
+            .clips-grid { grid-template-columns: 1fr; }
+        }
+        /* Management specific styles */
+        .admin-controls { display: flex; gap: 8px; margin-top: 12px; }
+        .btn-edit { padding: 8px 16px; background: rgba(59,130,246,0.15); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.3s; flex: 1; }
+        .btn-edit:hover { background: rgba(59,130,246,0.25); }
+        .btn-delete { padding: 8px 16px; background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.3s; flex: 1; }
+        .btn-delete:hover { background: rgba(239,68,68,0.25); }
+        .edit-input { width: 100%; padding: 8px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); font-family: 'Rajdhani', sans-serif; font-weight: 600; outline: none; margin-bottom: 8px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html#adminpanel" class="nav-logo">
+                <span class="white">KNGL</span>
+                <span class="orange">RUST</span>
+            </a>
+            <div style="display:flex; align-items:center; gap:16px;">
+                <span style="font-family:'Rajdhani',sans-serif; color:var(--text-tertiary); font-weight:600; letter-spacing:2px; font-size:0.9rem;">YÖNETİM PANELİ</span>
+                <a href="index.html#adminpanel" class="back-btn">← Geri Dön</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Toast / Confirm Modal -->
+    <div id="toastContainer" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:10000; display:flex; flex-direction:column; gap:10px; pointer-events:none;"></div>
+    
+    <div id="confirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:10001; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px); align-items:center; justify-content:center;">
+        <div style="background:rgba(20,20,22,0.95); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:30px; max-width:400px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+            <h4 id="confirmMessage" style="color:white; font-family:'Rajdhani',sans-serif; font-size:1.2rem; font-weight:600; margin-bottom:24px;">Emin misin?</h4>
+            <div style="display:flex; gap:12px; justify-content:center;">
+                <button id="confirmYes" style="padding:10px 24px; background:var(--rust-orange); color:white; border:none; border-radius:8px; font-family:'Rajdhani',sans-serif; font-weight:700; cursor:pointer; font-size:1rem;">Tamam</button>
+                <button id="confirmNo" style="padding:10px 24px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:white; border-radius:8px; font-family:'Rajdhani',sans-serif; font-weight:700; cursor:pointer; font-size:1rem;">İptal</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="main">
+        <div class="page-header">
+            <span class="section-tag">YÖNETİM</span>
+            <h1 class="section-title">Tüm Klipleri Yönet</h1>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" class="search-input" id="clipSearch" placeholder="Kanal veya başlığa göre ara..." autocomplete="off">
+            <div class="clip-count" id="clipCount">0 klip</div>
+        </div>
+
+        <div class="clips-grid" id="clipsGrid">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p style="color: var(--text-secondary); font-family: 'Rajdhani', sans-serif; font-size: 1.1rem;">Klipler yükleniyor...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    const API_BASE = 'https://knglrust.onrender.com';
+    const adminToken = localStorage.getItem('kngl_admin_token');
+
+    if (!adminToken) {
+        window.location.href = 'index.html#admin';
+    }
+
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.style.padding = '14px 24px';
+        toast.style.borderRadius = '8px';
+        toast.style.fontFamily = "'Inter', sans-serif";
+        toast.style.fontSize = '0.95rem';
+        toast.style.fontWeight = '500';
+        toast.style.color = 'white';
+        toast.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+        toast.style.transition = 'all 0.3s';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        
+        if (type === 'success') {
+            toast.style.background = 'linear-gradient(135deg, rgba(34,197,94,0.9), rgba(22,163,74,0.9))';
+            toast.style.border = '1px solid rgba(34,197,94,0.3)';
+        } else {
+            toast.style.background = 'linear-gradient(135deg, rgba(239,68,68,0.9), rgba(220,38,38,0.9))';
+            toast.style.border = '1px solid rgba(239,68,68,0.3)';
+        }
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateY(0)'; }, 10);
+        setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(-20px)'; setTimeout(() => toast.remove(), 300); }, 3000);
+    }
+
+    function customConfirm(message, onConfirm) {
+        const modal = document.getElementById('confirmModal');
+        document.getElementById('confirmMessage').textContent = message;
+        modal.style.display = 'flex';
+        
+        const yesBtn = document.getElementById('confirmYes');
+        const noBtn = document.getElementById('confirmNo');
+        
+        const cleanup = () => { modal.style.display = 'none'; yesBtn.onclick = null; noBtn.onclick = null; };
+        yesBtn.onclick = () => { cleanup(); onConfirm(); };
+        noBtn.onclick = () => { cleanup(); };
+    }
+
+    function formatDuration(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function renderClipCard(clip) {
+        const avatar = clip.channelAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${clip.channelName}`;
+        
+        return `
+        <div class="clip-card" style="cursor:default; transform:none;">
+            <div class="clip-thumbnail" style="cursor:pointer;" onclick="window.open('${clip.clipUrl}', '_blank')">
+                <img src="${clip.thumbnail}" alt="${clip.title}" loading="lazy" onerror="this.src='https://api.dicebear.com/7.x/shapes/svg?seed=${clip.clipId}'">
+                <div class="play-overlay">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+                <span class="duration-badge">${formatDuration(clip.duration || 0)}</span>
+            </div>
+            <div class="clip-info">
+                <input type="text" id="title_${clip.id}" class="edit-input" value="${clip.title || ''}" placeholder="Klip Başlığı">
+                <div class="clip-meta" style="margin-bottom:8px;">
+                    <span>${clip.views || 0} izlenme • ${clip.channelName}</span>
+                </div>
+                <div class="admin-controls">
+                    <button onclick="updateClip('${clip.id}')" class="btn-edit">Kaydet</button>
+                    <button onclick="deleteClip('${clip.id}')" class="btn-delete">Sil</button>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    let allClips = [];
+
+    async function loadClips() {
+        const grid = document.getElementById('clipsGrid');
+        try {
+            const res = await fetch(API_BASE + '/api/clips');
+            allClips = await res.json();
+            renderFilteredClips('');
+        } catch (err) {
+            grid.innerHTML = '<div class="empty-state"><h3>Klipler yüklenemedi</h3><p>Lütfen sayfayı yenileyin.</p></div>';
+        }
+    }
+
+    function renderFilteredClips(search) {
+        const grid = document.getElementById('clipsGrid');
+        const countEl = document.getElementById('clipCount');
+        
+        let filtered = allClips;
+        if (search) {
+            const s = search.toLowerCase();
+            filtered = allClips.filter(c => c.channelName.toLowerCase().includes(s) || (c.title && c.title.toLowerCase().includes(s)));
+        }
+        
+        countEl.textContent = filtered.length + ' klip';
+        
+        if (filtered.length === 0) {
+            grid.innerHTML = '<div class="empty-state"><h3>Klip bulunamadı</h3></div>';
+            return;
+        }
+        grid.innerHTML = filtered.map(renderClipCard).join('');
+    }
+
+    document.getElementById('clipSearch').addEventListener('input', (e) => {
+        renderFilteredClips(e.target.value);
+    });
+
+    async function updateClip(id) {
+        const title = document.getElementById('title_' + id).value.trim();
+        try {
+            const res = await fetch(API_BASE + '/api/clips/' + id, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
+                body: JSON.stringify({ title })
+            });
+            if (res.ok) {
+                showToast('Klip başlığı güncellendi', 'success');
+                const clip = allClips.find(c => c.id === id);
+                if (clip) clip.title = title;
+            } else {
+                showToast('Güncellenemedi. Oturum süresi dolmuş olabilir.', 'error');
+            }
+        } catch (e) { showToast('Hata: ' + e.message, 'error'); }
+    }
+
+    async function deleteClip(id) {
+        customConfirm('Bu klibi silmek istediğine emin misin?', async () => {
+            try {
+                const res = await fetch(API_BASE + '/api/clips/' + id, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + adminToken }
+                });
+                if (res.ok) {
+                    showToast('Klip silindi', 'success');
+                    allClips = allClips.filter(c => c.id !== id);
+                    renderFilteredClips(document.getElementById('clipSearch').value);
+                } else {
+                    showToast('Silinemedi. Oturum süresi dolmuş olabilir.', 'error');
+                }
+            } catch (e) { showToast('Hata: ' + e.message, 'error'); }
+        });
+    }
+
+    loadClips();
+    </script>
+</body>
+</html>
