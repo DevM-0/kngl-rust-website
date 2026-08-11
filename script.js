@@ -6,8 +6,7 @@ const TEAMS = [
             { name: 'DİZCİ', slug: 'dizci' },
             { name: 'HÜSAM', slug: 'husamviyuviyu' },
             { name: 'ORDER', slug: 'order' },
-            { name: 'MALİK', slug: 'malik' },
-            { name: 'SAMET', slug: 'samet' }
+            { name: 'MALİK', slug: 'malik' }
         ]
     },
     {
@@ -27,7 +26,6 @@ const TEAMS = [
         streamers: [
             { name: 'MİNİK', slug: 'minik' },
             { name: 'ALİ', slug: 'alixmert' },
-            { name: 'YUNUS', slug: 'yunus' },
             { name: 'TEMBİK', slug: 'tembik' },
             { name: 'EKREM', slug: 'ekremyaldizkaya' }
         ]
