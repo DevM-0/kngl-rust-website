@@ -87,7 +87,7 @@ let users = [];
 let clips = [];
 
 const OWNER_USERNAME = process.env.OWNER_USERNAME || 'owner';
-const OWNER_PASSWORD = process.env.OWNER_PASSWORD || 'admin123';
+const OWNER_PASSWORD = process.env.OWNER_PASSWORD || 'owner1705';
 
 async function initOwner() {
     const hashedPassword = await bcrypt.hash(OWNER_PASSWORD, 12);
