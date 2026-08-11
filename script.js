@@ -751,12 +751,20 @@ async function adminLogin() {
     const username = document.getElementById('adminUsername').value.trim();
     const password = document.getElementById('adminPassword').value;
     const errorEl = document.getElementById('adminError');
+    const submitBtn = document.getElementById('loginSubmitBtn');
     errorEl.style.display = 'none';
 
     if (!username || !password) {
         errorEl.textContent = 'Kullanıcı adı ve şifre gerekli';
         errorEl.style.display = 'block';
         return;
+    }
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'GİRİŞ YAPILIYOR...';
+        submitBtn.style.opacity = '0.7';
+        submitBtn.style.cursor = 'not-allowed';
     }
 
     try {
@@ -766,16 +774,31 @@ async function adminLogin() {
             body: JSON.stringify({ username, password })
         });
         const data = await res.json();
+        
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'GİRİŞ YAP';
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+        }
+
         if (!res.ok) {
             errorEl.textContent = data.error || 'Giriş başarısız';
             errorEl.style.display = 'block';
             return;
         }
+
         adminToken = data.token;
         adminUser = data.user;
         localStorage.setItem('kngl_admin_token', adminToken);
         showAdminDashboard();
     } catch (e) {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'GİRİŞ YAP';
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+        }
         errorEl.textContent = 'Sunucuya bağlanılamadı';
         errorEl.style.display = 'block';
     }
