@@ -261,7 +261,7 @@ function openModal(team) {
     modalLoading.style.display = 'flex';
     streamersGrid.innerHTML = '';
 
-    const apiUrl = window.location.protocol === 'file:' ? 'http://localhost:3000/api/streamers' : 'https://knglrust.onrender.com/api/streamers';
+    const apiUrl = 'https://knglrust.onrender.com/api/streamers';
     fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -378,7 +378,7 @@ async function fetchAndRenderMainStreamers() {
         // Fetch 5 streamers at a time to prevent Puppeteer CPU overload
         for (let i = 0; i < justSlugs.length; i += chunkSize) {
             const chunk = justSlugs.slice(i, i + chunkSize);
-            const apiUrl = window.location.protocol === 'file:' ? 'http://localhost:3000/api/streamers' : 'https://knglrust.onrender.com/api/streamers';
+            const apiUrl = 'https://knglrust.onrender.com/api/streamers';
             const res = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
