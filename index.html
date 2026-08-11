@@ -42,6 +42,10 @@
                     <span>Kurallar</span>
                     <div class="nav-link-glow"></div>
                 </a>
+                <a href="#admin" class="nav-link" data-text="Admin" id="adminNavLink" style="display:none;">
+                    <span>⚙ Admin</span>
+                    <div class="nav-link-glow"></div>
+                </a>
             </div>
             <button class="mobile-toggle" id="mobileToggle" aria-label="Menüyü aç">
                 <span></span>
@@ -202,6 +206,82 @@
         </div>
     </section>
 
-    <script src="script.js?v=4"></script>
+    <!-- Admin Panel Section -->
+    <section class="section" id="admin" style="position: relative; display: none;">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">YÖNETİM</span>
+                <h2 class="section-title">Admin Paneli</h2>
+            </div>
+
+            <!-- Login Form -->
+            <div id="adminLogin" style="max-width: 420px; margin: 0 auto;">
+                <div style="background: rgba(20,20,22,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 40px; backdrop-filter: blur(12px);">
+                    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 2px; text-align: center; margin-bottom: 24px; color: var(--text-primary);">Admin Girişi</h3>
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <input type="text" id="adminUsername" placeholder="Kullanıcı Adı" style="padding: 14px 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--rust-orange)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+                        <input type="password" id="adminPassword" placeholder="Şifre" style="padding: 14px 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--rust-orange)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" onkeypress="if(event.key==='Enter') adminLogin()">
+                        <button onclick="adminLogin()" style="padding: 14px; background: var(--rust-orange); color: white; border: none; border-radius: 10px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.1rem; letter-spacing: 1px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='#e85d3a'" onmouseout="this.style.background='var(--rust-orange)'">GİRİŞ YAP</button>
+                        <p id="adminError" style="color: #ef4444; text-align: center; font-size: 0.85rem; display: none;"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard -->
+            <div id="adminDashboard" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span id="adminUserInfo" style="font-family: 'Rajdhani', sans-serif; font-weight: 600; color: var(--text-secondary);"></span>
+                        <span id="adminRoleBadge" style="font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.75rem; padding: 3px 10px; border-radius: 6px;"></span>
+                    </div>
+                    <button onclick="adminLogout()" style="padding: 8px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.15); color: var(--text-secondary); border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)';this.style.color='var(--text-secondary)'">Çıkış Yap</button>
+                </div>
+
+                <!-- Tabs -->
+                <div style="display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0;">
+                    <button class="admin-tab active" onclick="switchAdminTab('clips')" id="tabClips" style="padding: 12px 24px; background: none; border: none; border-bottom: 2px solid var(--rust-orange); color: var(--text-primary); font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s;">KLİPLER</button>
+                    <button class="admin-tab" onclick="switchAdminTab('users')" id="tabUsers" style="padding: 12px 24px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-tertiary); font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s; display: none;">KULLANICILAR</button>
+                </div>
+
+                <!-- Clips Tab -->
+                <div id="adminClipsTab">
+                    <div style="background: rgba(20,20,22,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 24px; margin-bottom: 24px;">
+                        <h3 style="font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.2rem; margin-bottom: 16px; color: var(--text-primary);">Yeni Klip Ekle</h3>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <input type="text" id="clipUrlInput" placeholder="Kick klip linkini yapıştır..." style="flex: 1; min-width: 250px; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-primary); font-family: 'Inter', sans-serif; outline: none;" onfocus="this.style.borderColor='var(--rust-orange)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+                            <button onclick="fetchClipInfo()" id="fetchClipBtn" style="padding: 12px 24px; background: var(--rust-orange); color: white; border: none; border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='#e85d3a'" onmouseout="this.style.background='var(--rust-orange)'">Bilgileri Çek</button>
+                        </div>
+                        <!-- Preview -->
+                        <div id="clipPreview" style="display: none; margin-top: 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px;">
+                            <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: start;">
+                                <img id="previewThumb" src="" style="width: 200px; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; background: #111;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <input type="text" id="previewTitle" style="width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 1rem; outline: none; margin-bottom: 8px;">
+                                    <p id="previewMeta" style="color: var(--text-tertiary); font-size: 0.85rem; margin-bottom: 12px;"></p>
+                                    <button onclick="addClip()" style="padding: 10px 24px; background: #22c55e; color: white; border: none; border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.3s;">+ Klip Ekle</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="adminClipsList"></div>
+                </div>
+
+                <!-- Users Tab -->
+                <div id="adminUsersTab" style="display: none;">
+                    <div style="background: rgba(20,20,22,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 24px; margin-bottom: 24px;">
+                        <h3 style="font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.2rem; margin-bottom: 16px; color: var(--text-primary);">Yeni Admin Oluştur</h3>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <input type="text" id="newAdminUsername" placeholder="Kullanıcı adı" style="flex: 1; min-width: 150px; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-primary); font-family: 'Inter', sans-serif; outline: none;">
+                            <input type="password" id="newAdminPassword" placeholder="Şifre (min 6 karakter)" style="flex: 1; min-width: 150px; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-primary); font-family: 'Inter', sans-serif; outline: none;">
+                            <button onclick="createAdmin()" style="padding: 12px 24px; background: var(--rust-orange); color: white; border: none; border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-weight: 700; cursor: pointer;">Oluştur</button>
+                        </div>
+                    </div>
+                    <div id="adminUsersList"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js?v=5"></script>
 </body>
 </html>
