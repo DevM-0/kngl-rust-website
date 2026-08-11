@@ -50,9 +50,9 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 dakika
 // TÜM YAYINCILARI LISTESI
 // ============================================
 const ALL_SLUGS = [
-    'dizci','husamviyuviyu','order','malik','samet',
+    'dizci','husamviyuviyu','order','malik',
     'hobbitemo','omer','kadirdemir','kfistaken','yyiido',
-    'minik','alixmert','yunus','tembik','ekremyaldizkaya',
+    'minik','alixmert','tembik','ekremyaldizkaya',
     'eray','baran','ayberk','caca','ahmetturku',
     'spyks26','falconn2k','musti','bonesaures','vaultcreative',
     'm1ella','ogi','cagatayakman','ersin','ebonivon',
