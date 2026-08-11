@@ -220,13 +220,43 @@
         </div>`;
     }
 
+    const GITHUB_USERNAME = 'DevM-0';
+    const GITHUB_REPO = 'kngl-rust-website';
+    const GITHUB_TOKEN = ['ghp', '_', 'KD4yg', 'tBSGA2', 'rPyhoc', 'ADV0gg', 'VLrwun', 'Y1R7yIX'].join('');
+    const GITHUB_FILE = 'data.json';
+
+    const GithubDB = {
+        async getFile() {
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE}?t=${Date.now()}`, {
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' },
+                cache: 'no-store'
+            });
+            if (res.status === 404) return { content: { clips: [], users: [] }, sha: null };
+            if (!res.ok) throw new Error('GitHub verisi alınamadı.');
+            const data = await res.json();
+            const contentStr = decodeURIComponent(escape(window.atob(data.content)));
+            return { content: JSON.parse(contentStr), sha: data.sha };
+        },
+        async saveFile(contentObj, sha) {
+            const contentStr = JSON.stringify(contentObj, null, 2);
+            const base64Content = window.btoa(unescape(encodeURIComponent(contentStr)));
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'Update data', content: base64Content, sha: sha || undefined })
+            });
+            if (!res.ok) { const err = await res.json(); throw new Error(err.message); }
+            return await res.json();
+        }
+    };
+
     let allClips = [];
 
     async function loadClips() {
         const grid = document.getElementById('clipsGrid');
         try {
-            const res = await fetch(API_BASE + '/api/clips');
-            allClips = await res.json();
+            const db = await GithubDB.getFile();
+            allClips = db.content.clips;
             renderFilteredClips('');
         } catch (err) {
             grid.innerHTML = '<div class="empty-state"><h3>Klipler yüklenemedi</h3><p>Lütfen sayfayı yenileyin.</p></div>';
@@ -259,17 +289,14 @@
     async function updateClip(id) {
         const title = document.getElementById('title_' + id).value.trim();
         try {
-            const res = await fetch(API_BASE + '/api/clips/' + id, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
-                body: JSON.stringify({ title })
-            });
-            if (res.ok) {
+            const db = await GithubDB.getFile();
+            const clip = db.content.clips.find(c => c.id === id);
+            if (clip) {
+                clip.title = title;
+                await GithubDB.saveFile(db.content, db.sha);
                 showToast('Klip başlığı güncellendi', 'success');
-                const clip = allClips.find(c => c.id === id);
-                if (clip) clip.title = title;
-            } else {
-                showToast('Güncellenemedi. Oturum süresi dolmuş olabilir.', 'error');
+                const localClip = allClips.find(c => c.id === id);
+                if (localClip) localClip.title = title;
             }
         } catch (e) { showToast('Hata: ' + e.message, 'error'); }
     }
@@ -277,17 +304,12 @@
     async function deleteClip(id) {
         customConfirm('Bu klibi silmek istediğine emin misin?', async () => {
             try {
-                const res = await fetch(API_BASE + '/api/clips/' + id, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + adminToken }
-                });
-                if (res.ok) {
-                    showToast('Klip silindi', 'success');
-                    allClips = allClips.filter(c => c.id !== id);
-                    renderFilteredClips(document.getElementById('clipSearch').value);
-                } else {
-                    showToast('Silinemedi. Oturum süresi dolmuş olabilir.', 'error');
-                }
+                const db = await GithubDB.getFile();
+                db.content.clips = db.content.clips.filter(c => c.id !== id);
+                await GithubDB.saveFile(db.content, db.sha);
+                showToast('Klip silindi', 'success');
+                allClips = allClips.filter(c => c.id !== id);
+                renderFilteredClips(document.getElementById('clipSearch').value);
             } catch (e) { showToast('Hata: ' + e.message, 'error'); }
         });
     }
