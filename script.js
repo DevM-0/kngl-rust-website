@@ -934,31 +934,28 @@ function showAdminDashboard() {
         document.getElementById('tabUsers').style.display = 'none';
     }
 
+    loadAdminPendingClips();
     loadAdminClips();
     if (adminUser.role === 'owner') loadAdminUsers();
 }
 
 function switchAdminTab(tab) {
-    const clipsTab = document.getElementById('adminClipsTab');
-    const usersTab = document.getElementById('adminUsersTab');
-    const tabClips = document.getElementById('tabClips');
-    const tabUsers = document.getElementById('tabUsers');
-
-    if (tab === 'clips') {
-        clipsTab.style.display = 'block';
-        usersTab.style.display = 'none';
-        tabClips.style.borderBottomColor = 'var(--rust-orange)';
-        tabClips.style.color = 'var(--text-primary)';
-        tabUsers.style.borderBottomColor = 'transparent';
-        tabUsers.style.color = 'var(--text-tertiary)';
-    } else {
-        clipsTab.style.display = 'none';
-        usersTab.style.display = 'block';
-        tabUsers.style.borderBottomColor = 'var(--rust-orange)';
-        tabUsers.style.color = 'var(--text-primary)';
-        tabClips.style.borderBottomColor = 'transparent';
-        tabClips.style.color = 'var(--text-tertiary)';
-    }
+    const tabs = ['clips', 'pending', 'users'];
+    tabs.forEach(t => {
+        const tabEl = document.getElementById('admin' + t.charAt(0).toUpperCase() + t.slice(1) + 'Tab');
+        const btnEl = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (tabEl && btnEl) {
+            if (tab === t) {
+                tabEl.style.display = 'block';
+                btnEl.style.borderBottomColor = 'var(--rust-orange)';
+                btnEl.style.color = 'var(--text-primary)';
+            } else {
+                tabEl.style.display = 'none';
+                btnEl.style.borderBottomColor = 'transparent';
+                btnEl.style.color = 'var(--text-tertiary)';
+            }
+        }
+    });
 }
 
 // Klipler Yönetimi
@@ -1155,3 +1152,161 @@ async function deleteUser(id) {
         } catch (e) { showToast('Hata: ' + e.message, 'error'); }
     });
 }
+
+
+// Ziyaretçi Klip Önerme Sistemi
+function openSubmitClipModal() {
+    const modal = document.getElementById('submitClipModal');
+    if (modal) { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+}
+function closeSubmitClipModal() {
+    const modal = document.getElementById('submitClipModal');
+    if (modal) { modal.style.display = 'none'; document.body.style.overflow = ''; }
+}
+async function submitVisitorClip() {
+    const url = document.getElementById('visitorClipUrl').value.trim();
+    const title = document.getElementById('visitorClipTitle').value.trim();
+    const errEl = document.getElementById('visitorClipError');
+    const btn = document.getElementById('visitorSubmitBtn');
+    
+    errEl.style.display = 'none';
+    if (!url || !title) {
+        errEl.textContent = 'Lütfen link ve başlık giriniz.';
+        errEl.style.display = 'block';
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = 'GÖNDERİLİYOR...';
+    btn.style.opacity = '0.7';
+
+    try {
+        let userIp = 'unknown';
+        try {
+            const ipRes = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipRes.json();
+            userIp = ipData.ip;
+        } catch(e) {}
+        
+        const parts = url.split('/');
+        const clipId = parts[parts.length - 1].split('?')[0];
+        const res = await fetch('https://kick.com/api/v2/clips/' + clipId);
+        if (!res.ok) throw new Error('Klip bulunamadı veya link hatalı.');
+        const data = await res.json();
+        const clipData = data.clip;
+        
+        const db = await GithubDB.getFile();
+        if (!db.content.pending_clips) db.content.pending_clips = [];
+        
+        const ipCount = db.content.pending_clips.filter(c => c.ip === userIp).length;
+        if (ipCount >= 3) {
+            throw new Error('Çok fazla onay bekleyen klibiniz var. Lütfen daha sonra tekrar deneyin.');
+        }
+        
+        if (db.content.clips && db.content.clips.find(c => c.id === clipData.id)) throw new Error('Bu klip zaten sitede yayında!');
+        if (db.content.pending_clips.find(c => c.id === clipData.id)) throw new Error('Bu klip zaten onaya gönderilmiş!');
+        
+        const newPendingClip = {
+            id: clipData.id,
+            title: title,
+            videoUrl: clipData.video_url,
+            thumbnail: clipData.thumbnail_url,
+            channelName: clipData.channel.username,
+            duration: clipData.duration,
+            views: clipData.views,
+            createdAt: clipData.created_at,
+            ip: userIp
+        };
+        db.content.pending_clips.unshift(newPendingClip);
+        await GithubDB.saveFile(db.content, db.sha);
+        
+        alert('Klibin başarıyla onaya gönderildi! Yönetici onayladıktan sonra sitede yayınlanacaktır.');
+        closeSubmitClipModal();
+        document.getElementById('visitorClipUrl').value = '';
+        document.getElementById('visitorClipTitle').value = '';
+        
+    } catch(e) {
+        errEl.textContent = e.message;
+        errEl.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'ONAYA GÖNDER';
+        btn.style.opacity = '1';
+    }
+}
+
+
+async function loadAdminPendingClips() {
+    const container = document.getElementById('adminPendingList');
+    const countEl = document.getElementById('adminPendingCount');
+    if (!container) return;
+    try {
+        const db = await GithubDB.getFile();
+        if (!db.content.pending_clips) db.content.pending_clips = [];
+        const clips = db.content.pending_clips;
+        if (countEl) countEl.textContent = clips.length + ' klip';
+        
+        if (clips.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:var(--text-tertiary);padding:40px;font-family:Rajdhani,sans-serif;font-size:1.1rem;">Onay bekleyen klip yok.</p>';
+            return;
+        }
+        
+        container.style.display = 'grid';
+        container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(320px, 1fr))';
+        container.style.gap = '16px';
+        
+        container.innerHTML = clips.map(clip => `
+            <div style="display:flex;flex-direction:column;gap:12px;padding:12px;background:rgba(20,20,22,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:10px;">
+                <div style="display:flex;gap:12px;">
+                    <img src="${clip.thumbnail}" style="width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:#111;">
+                    <div style="flex:1;min-width:140px;">
+                        <input type="text" value="${clip.title || ''}" id="pendingTitle_${clip.id}" style="width:100%;padding:6px 10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:var(--text-primary);font-family:'Rajdhani',sans-serif;font-weight:600;outline:none;font-size:0.95rem;">
+                        <p style="color:var(--text-tertiary);font-size:0.8rem;margin-top:4px;">${clip.channelName} • ${formatClipDuration(clip.duration || 0)}</p>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;justify-content:flex-end;">
+                    <button onclick="approvePendingClip('${clip.id}')" style="padding:6px 14px;background:rgba(34,197,94,0.2);color:#22c55e;border:1px solid rgba(34,197,94,0.3);border-radius:6px;font-family:'Rajdhani',sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Onayla</button>
+                    <button onclick="rejectPendingClip('${clip.id}')" style="padding:6px 14px;background:rgba(239,68,68,0.2);color:#ef4444;border:1px solid rgba(239,68,68,0.3);border-radius:6px;font-family:'Rajdhani',sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Reddet</button>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        container.innerHTML = '<p style="color:#ef4444;text-align:center;">Klipler yüklenemedi</p>';
+    }
+}
+
+async function approvePendingClip(id) {
+    const title = document.getElementById('pendingTitle_' + id).value.trim();
+    try {
+        const db = await GithubDB.getFile();
+        if (!db.content.pending_clips) db.content.pending_clips = [];
+        
+        const clipIdx = db.content.pending_clips.findIndex(c => c.id === id);
+        if (clipIdx !== -1) {
+            const clip = db.content.pending_clips[clipIdx];
+            clip.title = title;
+            db.content.pending_clips.splice(clipIdx, 1);
+            db.content.clips.unshift(clip);
+            await GithubDB.saveFile(db.content, db.sha);
+            showToast('Klip onaylandı ve eklendi!', 'success');
+            loadAdminPendingClips();
+            loadAdminClips();
+            if(typeof loadClipsPreview === 'function') loadClipsPreview(db.content.clips);
+        }
+    } catch (e) { showToast('Hata: ' + e.message, 'error'); }
+}
+
+async function rejectPendingClip(id) {
+    customConfirm('Bu klip önerisini reddetmek istediğine emin misin?', async () => {
+        try {
+            const db = await GithubDB.getFile();
+            if (!db.content.pending_clips) db.content.pending_clips = [];
+            
+            db.content.pending_clips = db.content.pending_clips.filter(c => c.id !== id);
+            await GithubDB.saveFile(db.content, db.sha);
+            showToast('Klip reddedildi ve silindi.', 'success');
+            loadAdminPendingClips();
+        } catch (e) { showToast('Hata: ' + e.message, 'error'); }
+    });
+}
+
