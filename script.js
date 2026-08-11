@@ -618,7 +618,80 @@ document.addEventListener('mouseout', (e) => {
 // ========================
 setInterval(() => {
     console.log('[Auto-Refresh] Yayıncı verileri güncelleniyor...');
-    // Cache'i temizle ki taze veri gelsin
     try { localStorage.removeItem(CACHE_KEY); } catch(e) {}
     fetchAndRenderMainStreamers();
-}, 2 * 60 * 1000); // 2 dakika
+}, 2 * 60 * 1000);
+
+// ========================
+// KLİPLER PREVIEW (Ana Sayfa)
+// ========================
+const SLUG_TO_TEAM = {};
+TEAMS.forEach(team => {
+    team.streamers.forEach(s => {
+        SLUG_TO_TEAM[s.slug] = team.name;
+    });
+});
+
+function formatClipDuration(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function renderClipCard(clip) {
+    const slug = clip.channelName ? clip.channelName.toLowerCase() : '';
+    const team = SLUG_TO_TEAM[slug] || '';
+    const teamBadge = team ? `<span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.75rem;padding:2px 8px;border-radius:4px;background:rgba(205,65,43,0.2);color:var(--rust-orange);letter-spacing:1px;margin-left:auto;">${team}</span>` : '';
+    const avatar = clip.channelAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${clip.channelName}`;
+    
+    return `
+    <a href="${clip.clipUrl}" target="_blank" rel="noopener" style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease;text-decoration:none;color:inherit;display:block;" onmouseover="this.style.transform='translateY(-6px) scale(1.02)';this.style.boxShadow='0 15px 40px rgba(0,0,0,0.5),0 0 25px rgba(205,65,43,0.15)';this.style.borderColor='rgba(205,65,43,0.4)'" onmouseout="this.style.transform='none';this.style.boxShadow='none';this.style.borderColor='rgba(255,255,255,0.06)'">
+        <div style="position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#111;">
+            <img src="${clip.thumbnail}" alt="${clip.title}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.src='https://api.dicebear.com/7.x/shapes/svg?seed=${clip.clipId}'">
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;height:50px;background:rgba(205,65,43,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0.8;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <span style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.8);color:white;padding:3px 8px;border-radius:4px;font-size:0.8rem;font-weight:600;font-family:'Inter',sans-serif;">${formatClipDuration(clip.duration || 0)}</span>
+        </div>
+        <div style="padding:14px;">
+            <h3 style="font-family:'Rajdhani',sans-serif;font-size:1.05rem;font-weight:700;color:var(--text-primary);margin-bottom:6px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${clip.title || 'Başlıksız Klip'}</h3>
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;color:#666;font-size:0.8rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#666"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                ${clip.views || 0} izlenme
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <img src="${avatar}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.1);" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${clip.channelName}'">
+                <span style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:0.9rem;color:#e85d3a;">${clip.channelName}</span>
+                ${teamBadge}
+            </div>
+        </div>
+    </a>`;
+}
+
+async function loadClipsPreview() {
+    const grid = document.getElementById('clipsPreviewGrid');
+    if (!grid) return;
+    
+    try {
+        const res = await fetch('https://knglrust.onrender.com/api/clips');
+        const clips = await res.json();
+        
+        if (clips.length === 0) {
+            grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#666;font-family:Rajdhani,sans-serif;font-size:1.1rem;padding:40px 0;">Henüz klip eklenmemiş.</p>';
+            return;
+        }
+        
+        // Max 8 klip göster (2 satır)
+        const preview = clips.slice(0, 8);
+        grid.innerHTML = preview.map(renderClipCard).join('');
+    } catch (err) {
+        console.error('Clips preview error:', err);
+        grid.innerHTML = '';
+    }
+}
+
+// Klipleri yükle
+loadClipsPreview();
+
+// Klipleri de otomatik yenile
+setInterval(loadClipsPreview, 2 * 60 * 1000);
