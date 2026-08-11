@@ -358,6 +358,131 @@ if (modal) {
 }
 
 // --- Main Streamers Grid Logic ---
+const CACHE_KEY = 'knglrust_streamers';
+const CACHE_DURATION = 3 * 60 * 1000; // 3 dakika tarayıcı cache
+
+function getCachedStreamers() {
+    try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (Date.now() - parsed.timestamp < CACHE_DURATION) {
+            return parsed.data;
+        }
+    } catch (e) {}
+    return null;
+}
+
+function setCachedStreamers(data) {
+    try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+    } catch (e) {}
+}
+
+function renderStreamersToGrid(mergedData, mainGrid, liveCounter) {
+    mainGrid.innerHTML = '';
+
+    const liveStreamers = mergedData.filter(s => s.isLive);
+    const offlineStreamers = mergedData.filter(s => !s.isLive);
+    offlineStreamers.sort((a, b) => a.slug.localeCompare(b.slug));
+
+    if (liveCounter) {
+        liveCounter.textContent = liveStreamers.length + ' canlı';
+    }
+
+    const renderCard = (s, index) => {
+        const card = document.createElement('a');
+        card.href = `https://kick.com/${s.slug}`;
+        card.target = '_blank';
+        card.className = `streamer-card ${s.isLive ? 'live' : 'offline'}`;
+        card.style.cssText = 'animation: fadeInUp 0.5s ease forwards; text-decoration: none; display: flex; flex-direction: column; color: inherit; border: none; background: transparent; box-shadow: none; outline: none; overflow: hidden; border-radius: 12px;';
+        card.style.transitionDelay = `${(index % 8) * 50}ms`;
+
+        const displayName = s.slug.charAt(0).toUpperCase() + s.slug.slice(1);
+
+        if (s.isLive) {
+            card.innerHTML = `
+                <div style="position: relative; aspect-ratio: 16/9; overflow: hidden;">
+                    <div style="background: url('${s.thumbnail}') center/cover no-repeat; width: 100%; height: 100%;">
+                        <div style="position: absolute; bottom: 8px; left: 8px; right: 8px; display: flex; justify-content: space-between; align-items: flex-end;">
+                            <span style="background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: #fff;">${s.category || 'Rust'}</span>
+                            <span style="background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 0.8rem; font-weight: bold; color: #fff;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                                ${s.viewerCount}
+                            </span>
+                        </div>
+                        <div style="position: absolute; top: 8px; left: 8px; background: #e74c3c; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 6px;"><span style="width:6px; height:6px; background:#fff; border-radius:50%; animation:pulse 2s infinite;"></span> CANLI</div>
+                    </div>
+                </div>
+                <div style="padding: 12px; display: flex; align-items: center; gap: 12px; background: rgba(20, 20, 20, 0.9);">
+                    <img src="${s.profilePicture}" alt="${displayName}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.1);">
+                    <div style="overflow: hidden; width: 100%;">
+                        <h4 style="margin: 0 0 2px; font-size: 1.1rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700;">${displayName}</h4>
+                        <p style="margin: 0 0 4px; font-size: 0.85rem; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'Inter', sans-serif;">${s.title || 'Rust Oynuyor'}</p>
+                        <p style="color: #e85d3a; margin: 0; font-size: 0.9rem; font-weight: 700; text-transform: uppercase;">${s.teamName}</p>
+                    </div>
+                </div>
+            `;
+        } else {
+            card.innerHTML = `
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; padding: 24px 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 12px; transition: all 0.3s ease;">
+                    <img src="${s.profilePicture}" alt="${displayName}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; filter: grayscale(80%) opacity(0.7);">
+                    <div>
+                        <h4 style="margin: 0 0 4px; font-size: 0.95rem; color: #fff; font-family: 'Inter', sans-serif; font-weight: 600;">${displayName}</h4>
+                        <p style="color: #e85d3a; margin: 0 0 12px; font-size: 0.75rem; font-family: 'Inter', sans-serif; font-weight: 700; text-transform: uppercase;">${s.teamName}</p>
+                        <span style="font-size: 0.7rem; font-weight: 700; color: #555; letter-spacing: 0.5px;">ÇEVRİMDİŞI</span>
+                    </div>
+                </div>
+            `;
+        }
+        return card;
+    };
+
+    // Canlı yayıncıları önce göster
+    liveStreamers.forEach((s, index) => {
+        mainGrid.appendChild(renderCard(s, index));
+    });
+
+    // Çevrimdışı bölüm
+    if (offlineStreamers.length > 0) {
+        const separator = document.createElement('div');
+        separator.style.cssText = 'grid-column: 1 / -1; margin-top: 40px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;';
+        separator.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #888;">
+                <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+                <polyline points="17 2 12 7 7 2"></polyline>
+            </svg>
+            <h3 style="color: #fff; margin: 0; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600;">Çevrimdışı</h3>
+            <span style="background: rgba(255,255,255,0.1); color: #ccc; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">${offlineStreamers.length}</span>
+            <svg class="offline-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto; transition: transform 0.3s ease;">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        `;
+        mainGrid.appendChild(separator);
+
+        const offlineContainer = document.createElement('div');
+        offlineContainer.id = 'offlineContainer';
+        offlineContainer.style.cssText = 'grid-column: 1 / -1; display: none; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;';
+
+        offlineStreamers.forEach((s, index) => {
+            offlineContainer.appendChild(renderCard(s, index));
+        });
+        mainGrid.appendChild(offlineContainer);
+
+        separator.addEventListener('click', () => {
+            const container = document.getElementById('offlineContainer');
+            const chevron = separator.querySelector('.offline-chevron');
+            if (container.style.display === 'none') {
+                container.style.display = 'grid';
+                chevron.style.transform = 'rotate(180deg)';
+            } else {
+                container.style.display = 'none';
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        });
+    }
+}
+
 async function fetchAndRenderMainStreamers() {
     const mainGrid = document.getElementById('mainStreamersGrid');
     const liveCounter = document.getElementById('mainLiveCounter');
@@ -370,24 +495,31 @@ async function fetchAndRenderMainStreamers() {
         });
     });
 
-    const justSlugs = allSlugs.map(s => s.slug);
-    let fetchedData = [];
+    // 1) Önce localStorage'dan cache'i göster (ANINDA yüklenir)
+    const cachedData = getCachedStreamers();
+    if (cachedData) {
+        const mergedCached = cachedData.map(apiData => {
+            const staticData = allSlugs.find(s => s.slug === apiData.slug);
+            return { ...staticData, ...apiData };
+        });
+        mergedCached.sort((a, b) => {
+            if (a.isLive && !b.isLive) return -1;
+            if (!a.isLive && b.isLive) return 1;
+            if (a.isLive && b.isLive) return b.viewerCount - a.viewerCount;
+            return 0;
+        });
+        renderStreamersToGrid(mergedCached, mainGrid, liveCounter);
+    }
 
+    // 2) Arka planda taze veriyi çek (TEK İSTEK - GET)
     try {
-        const chunkSize = 5;
-        // Fetch 5 streamers at a time to prevent Puppeteer CPU overload
-        for (let i = 0; i < justSlugs.length; i += chunkSize) {
-            const chunk = justSlugs.slice(i, i + chunkSize);
-            const apiUrl = 'https://knglrust.onrender.com/api/streamers';
-            const res = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ slugs: chunk })
-            });
-            if (!res.ok) throw new Error('Proxy error');
-            const data = await res.json();
-            fetchedData.push(...data);
-        }
+        const apiUrl = 'https://knglrust.onrender.com/api/all-streamers';
+        const res = await fetch(apiUrl);
+        if (!res.ok) throw new Error('API error');
+        const fetchedData = await res.json();
+
+        // Cache'e kaydet
+        setCachedStreamers(fetchedData);
 
         const mergedData = fetchedData.map(apiData => {
             const staticData = allSlugs.find(s => s.slug === apiData.slug);
@@ -401,116 +533,14 @@ async function fetchAndRenderMainStreamers() {
             return 0;
         });
 
-        mainGrid.innerHTML = ''; 
-
-        const liveStreamers = mergedData.filter(s => s.isLive);
-        const offlineStreamers = mergedData.filter(s => !s.isLive);
-        
-        // Sort offline alphabetically
-        offlineStreamers.sort((a, b) => a.slug.localeCompare(b.slug));
-
-        if (liveCounter) {
-            liveCounter.textContent = liveStreamers.length + ' canlı';
-        }
-
-        const renderCard = (s, index) => {
-            const card = document.createElement('a');
-            card.href = `https://kick.com/${s.slug}`;
-            card.target = '_blank';
-            card.className = `streamer-card ${s.isLive ? 'live' : 'offline'}`;
-            card.style.cssText = 'animation: fadeInUp 0.5s ease forwards; text-decoration: none; display: flex; flex-direction: column; color: inherit; border: none; background: transparent; box-shadow: none; outline: none; overflow: hidden; border-radius: 12px;';
-            card.style.transitionDelay = `${(index % 8) * 50}ms`;
-
-            // BAŞ HARFİ BÜYÜK NİCKNAME
-            const displayName = s.slug.charAt(0).toUpperCase() + s.slug.slice(1);
-
-            if (s.isLive) {
-                card.innerHTML = `
-                    <div style="position: relative; aspect-ratio: 16/9; overflow: hidden;">
-                        <div style="background: url('${s.thumbnail}') center/cover no-repeat; width: 100%; height: 100%;">
-                            <div style="position: absolute; bottom: 8px; left: 8px; right: 8px; display: flex; justify-content: space-between; align-items: flex-end;">
-                                <span style="background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: #fff;">${s.category || 'Rust'}</span>
-                                <span style="background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 0.8rem; font-weight: bold; color: #fff;">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                                    ${s.viewerCount}
-                                </span>
-                            </div>
-                            <div style="position: absolute; top: 8px; left: 8px; background: #e74c3c; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 6px;"><span style="width:6px; height:6px; background:#fff; border-radius:50%; animation:pulse 2s infinite;"></span> CANLI</div>
-                        </div>
-                    </div>
-                    <div style="padding: 12px; display: flex; align-items: center; gap: 12px; background: rgba(20, 20, 20, 0.9);">
-                        <img src="${s.profilePicture}" alt="${displayName}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.1);">
-                        <div style="overflow: hidden; width: 100%;">
-                            <h4 style="margin: 0 0 2px; font-size: 1.1rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700;">${displayName}</h4>
-                            <p style="margin: 0 0 4px; font-size: 0.85rem; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'Inter', sans-serif;">${s.title || 'Rust Oynuyor'}</p>
-                            <p style="color: #e85d3a; margin: 0; font-size: 0.9rem; font-weight: 700; text-transform: uppercase;">${s.teamName}</p>
-                        </div>
-                    </div>
-                `;
-            } else {
-                card.innerHTML = `
-                    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; padding: 24px 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 12px; transition: all 0.3s ease;">
-                        <img src="${s.profilePicture}" alt="${displayName}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; filter: grayscale(80%) opacity(0.7);">
-                        <div>
-                            <h4 style="margin: 0 0 4px; font-size: 0.95rem; color: #fff; font-family: 'Inter', sans-serif; font-weight: 600;">${displayName}</h4>
-                            <p style="color: #e85d3a; margin: 0 0 12px; font-size: 0.75rem; font-family: 'Inter', sans-serif; font-weight: 700; text-transform: uppercase;">${s.teamName}</p>
-                            <span style="font-size: 0.7rem; font-weight: 700; color: #555; letter-spacing: 0.5px;">ÇEVRİMDİŞI</span>
-                        </div>
-                    </div>
-                `;
-            }
-            return card;
-        };
-
-        // Render Lives first
-        liveStreamers.forEach((s, index) => {
-            mainGrid.appendChild(renderCard(s, index));
-        });
-
-        // Offline Collapsible Section
-        if (offlineStreamers.length > 0) {
-            const separator = document.createElement('div');
-            separator.style.cssText = 'grid-column: 1 / -1; margin-top: 40px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;';
-            separator.innerHTML = `
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #888;">
-                    <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
-                    <polyline points="17 2 12 7 7 2"></polyline>
-                </svg>
-                <h3 style="color: #fff; margin: 0; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600;">Çevrimdışı</h3>
-                <span style="background: rgba(255,255,255,0.1); color: #ccc; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">${offlineStreamers.length}</span>
-                <svg class="offline-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto; transition: transform 0.3s ease;">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            `;
-            mainGrid.appendChild(separator);
-
-            // Offline cards container (hidden by default)
-            const offlineContainer = document.createElement('div');
-            offlineContainer.id = 'offlineContainer';
-            offlineContainer.style.cssText = 'grid-column: 1 / -1; display: none; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;';
-
-            offlineStreamers.forEach((s, index) => {
-                offlineContainer.appendChild(renderCard(s, index));
-            });
-            mainGrid.appendChild(offlineContainer);
-
-            // Toggle offline visibility
-            separator.addEventListener('click', () => {
-                const container = document.getElementById('offlineContainer');
-                const chevron = separator.querySelector('.offline-chevron');
-                if (container.style.display === 'none') {
-                    container.style.display = 'grid';
-                    chevron.style.transform = 'rotate(180deg)';
-                } else {
-                    container.style.display = 'none';
-                    chevron.style.transform = 'rotate(0deg)';
-                }
-            });
-        }
+        renderStreamersToGrid(mergedData, mainGrid, liveCounter);
 
     } catch (err) {
         console.error('API Error:', err);
-        mainGrid.innerHTML = '<p style="color: #ef4444; grid-column: 1/-1; text-align: center;">Yayıncı verileri çekilemedi. Node.js arka plan sunucusunun çalıştığından emin olun.</p>';
+        // Cache varsa zaten gösteriliyor, yoksa hata göster
+        if (!cachedData) {
+            mainGrid.innerHTML = '<p style="color: #ef4444; grid-column: 1/-1; text-align: center;">Yayıncı verileri çekilemedi. Lütfen sayfayı yenileyin.</p>';
+        }
     }
 }
 
