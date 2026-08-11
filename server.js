@@ -76,9 +76,11 @@ app.post('/api/streamers', async (req, res) => {
     }
 });
 
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-    app.listen(PORT, () => {
-        console.log(`Arka plan sunucusu basladi: http://localhost:${PORT}`);
+const port = process.env.PORT || 3000;
+
+if (!process.env.VERCEL) {
+    app.listen(port, () => {
+        console.log(`Arka plan sunucusu basladi: http://localhost:${port}`);
         console.log(`Bu sunucu Kick verilerini DOĞRUDAN orijinal kaynağından V1 API (webp destekli) çeker!`);
     });
 }
