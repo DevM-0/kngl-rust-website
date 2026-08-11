@@ -1,4 +1,4 @@
-﻿/* ================================================
+/* ================================================
    KNGL RUST - Rust Game Themed Website
    Design System & Styles
    ================================================ */
@@ -1339,22 +1339,224 @@ body {
 .rule-item.visible,
 .faq-item.visible {
     opacity: 1;
+   FAQ
+   ================================================ */
+.faq-list {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.faq-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: var(--transition-fast);
+}
+
+.faq-item:hover {
+    border-color: var(--border-hover);
+}
+
+.faq-item.active {
+    border-color: var(--rust-orange);
+    box-shadow: 0 0 20px rgba(205, 65, 43, 0.08);
+}
+
+.faq-question {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: left;
+    transition: var(--transition-fast);
+}
+
+.faq-question:hover {
+    color: var(--rust-orange-light);
+}
+
+.faq-icon {
+    transition: var(--transition-smooth);
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+}
+
+.faq-item.active .faq-icon {
+    transform: rotate(180deg);
+    color: var(--rust-orange);
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+}
+
+.faq-item.active .faq-answer {
+    max-height: 200px;
+}
+
+.faq-answer p {
+    padding: 0 24px 20px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+/* ================================================
+   FOOTER
+   ================================================ */
+.footer {
+    position: relative;
+    z-index: 1;
+    padding: 60px 0 30px;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-subtle);
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.footer-brand {
+    max-width: 300px;
+}
+
+.footer-logo .logo-text {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    letter-spacing: 3px;
+}
+
+.footer-desc {
+    font-size: 0.9rem;
+    color: var(--text-tertiary);
+    margin-top: 12px;
+    font-family: var(--font-heading);
+    letter-spacing: 1px;
+}
+
+.footer-links {
+    display: flex;
+    gap: 60px;
+}
+
+.footer-col h4 {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+}
+
+.footer-col a {
+    display: block;
+    color: var(--text-tertiary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 4px 0;
+    transition: var(--transition-fast);
+}
+
+.footer-col a:hover {
+    color: var(--rust-orange-light);
+    transform: translateX(4px);
+}
+
+.footer-bottom {
+    padding-top: 24px;
+    border-top: 1px solid var(--border-subtle);
+    text-align: center;
+}
+
+.footer-bottom p {
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+}
+
+/* ================================================
+   ANIMATIONS
+   ================================================ */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scroll Reveal */
+.team-card,
+.streamer-card,
+.staff-card,
+.rule-item,
+.faq-item {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease, border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.team-card.visible,
+.streamer-card.visible,
+.staff-card.visible,
+.rule-item.visible,
+.faq-item.visible {
+    opacity: 1;
     transform: translateY(0);
 }
 
 /* ================================================
    RESPONSIVE
    ================================================ */
+
+/* Tablet */
 @media (max-width: 1024px) {
     .teams-grid {
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+
+    .section-title {
+        font-size: clamp(2rem, 4vw, 3rem);
     }
 }
 
+/* Mobil */
 @media (max-width: 768px) {
     :root {
         --nav-height: 64px;
-        --section-padding: 60px;
+        --section-padding: 40px;
     }
 
     .mobile-toggle {
@@ -1375,6 +1577,7 @@ body {
         padding: 20px;
         transform: translateX(100%);
         transition: var(--transition-smooth);
+        z-index: 1000;
     }
 
     .nav-links.active {
@@ -1386,18 +1589,44 @@ body {
         padding: 14px 24px;
     }
 
+    /* Hero Section Mobil */
+    .hero-title {
+        font-size: clamp(2.5rem, 10vw, 4rem) !important;
+    }
+
     .hero-stats {
-        gap: 24px;
+        gap: 16px;
         flex-wrap: wrap;
+        justify-content: center;
     }
 
     .stat-number {
-        font-size: 2.2rem;
+        font-size: 1.8rem;
     }
 
+    .stat-label {
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+    }
+
+    /* Timer Mobil */
+    .timer-display {
+        gap: 8px !important;
+    }
+
+    .timer-display .timer-block {
+        min-width: 60px;
+    }
+
+    .timer-display .timer-value {
+        font-size: 2rem !important;
+    }
+
+    /* Filter Bar Mobil */
     .filter-bar {
         flex-direction: column;
         align-items: stretch;
+        gap: 12px;
     }
 
     .search-box {
@@ -1406,44 +1635,143 @@ body {
 
     .filter-buttons {
         justify-content: center;
+        flex-wrap: wrap;
     }
 
-    .teams-grid,
-    .streamers-grid {
+    .filter-btn {
+        padding: 8px 14px;
+        font-size: 0.8rem;
+    }
+
+    /* Grid Mobil - 2 sütun */
+    .teams-grid {
         grid-template-columns: 1fr;
     }
 
+    .streamers-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    /* Yayıncı Kartları Mobil */
+    .streamer-card {
+        border-radius: 10px !important;
+    }
+
+    .streamer-card img {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    .streamer-card h4 {
+        font-size: 0.85rem !important;
+    }
+
+    .streamer-card p {
+        font-size: 0.7rem !important;
+    }
+
+    /* Section Spacing Mobil */
+    .section-header {
+        margin-bottom: 32px;
+    }
+
+    .section-title {
+        font-size: clamp(1.8rem, 6vw, 2.5rem);
+        letter-spacing: 1px;
+    }
+
+    .section-tag {
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+    }
+
+    /* Staff Grid Mobil */
     .staff-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 
+    /* Footer Mobil */
     .footer-content {
         flex-direction: column;
+        text-align: center;
     }
 
     .footer-links {
-        gap: 40px;
+        gap: 24px;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
+    /* Kurallar Mobil */
     .rule-item {
-        gap: 16px;
-        padding: 20px;
-    }
-}
-
-@media (max-width: 480px) {
-    .staff-grid {
-        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 16px;
     }
 
+    .rule-number {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+
+    /* Modal Mobil */
+    .modal-content {
+        width: 95% !important;
+        max-height: 90vh !important;
+        margin: 5vh auto !important;
+        padding: 16px !important;
+    }
+
+    .modal-streamers-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    /* Butonlar Mobil */
     .hero-actions {
         flex-direction: column;
         align-items: center;
+        gap: 12px;
     }
 
     .btn {
         width: 100%;
         justify-content: center;
+        padding: 12px 24px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Küçük Mobil */
+@media (max-width: 480px) {
+    .staff-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .streamers-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .modal-streamers-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .hero-stats {
+        gap: 12px;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+    }
+
+    .team-card-header {
+        font-size: 1.6rem !important;
+        padding: 16px 14px 12px !important;
+    }
+
+    .team-members-list li {
+        font-size: 0.95rem;
     }
 }
 
@@ -1631,11 +1959,13 @@ body {
     min-width: 0;
 }
 .streamer-card-v2 .sc-name {
-    font-size: 0.875rem; /* 14px */
-    font-weight: 600;
+    font-family: var(--font-heading);
+    font-size: 1.15rem; /* ~18px */
+    font-weight: 700;
     color: #fff;
     margin: 0 0 2px 0;
     line-height: 1.2;
+    letter-spacing: 0.5px;
 }
 .streamer-card-v2 .sc-team {
     font-size: 0.75rem; /* 12px */
@@ -1666,7 +1996,8 @@ body {
     opacity: 0.6;
 }
 .streamer-card-v2.offline .sc-name {
-    color: #999;
+    color: #ddd;
+    font-size: 1.2rem;
 }
 .streamer-card-v2.offline .sc-badge-offline {
     margin-top: 16px;
