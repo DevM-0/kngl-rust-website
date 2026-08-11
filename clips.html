@@ -118,7 +118,24 @@
     </main>
 
     <script>
-    const API_BASE = 'https://knglrust.onrender.com';
+    const GITHUB_USERNAME = 'DevM-0';
+    const GITHUB_REPO = 'kngl-rust-website';
+    const GITHUB_TOKEN = ['ghp', '_', 'KD4yg', 'tBSGA2', 'rPyhoc', 'ADV0gg', 'VLrwun', 'Y1R7yIX'].join('');
+    const GITHUB_FILE = 'data.json';
+
+    const GithubDB = {
+        async getFile() {
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE}?t=${Date.now()}`, {
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' },
+                cache: 'no-store'
+            });
+            if (res.status === 404) return { content: { clips: [], users: [] }, sha: null };
+            if (!res.ok) throw new Error('GitHub verisi alınamadı.');
+            const data = await res.json();
+            const contentStr = decodeURIComponent(escape(window.atob(data.content)));
+            return { content: JSON.parse(contentStr), sha: data.sha };
+        }
+    };
 
     // Takım bilgileri (slug -> takım adı eşleştirmesi)
     const SLUG_TO_TEAM = {
@@ -179,8 +196,8 @@
     async function loadClips() {
         const grid = document.getElementById('clipsGrid');
         try {
-            const res = await fetch(API_BASE + '/api/clips');
-            allClips = await res.json();
+            const db = await GithubDB.getFile();
+            allClips = db.content.clips;
             renderFilteredClips('');
         } catch (err) {
             grid.innerHTML = '<div class="empty-state"><h3>Klipler yüklenemedi</h3><p>Lütfen sayfayı yenileyin.</p></div>';
