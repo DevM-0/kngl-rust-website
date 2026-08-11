@@ -15,19 +15,17 @@ app.use((req, res, next) => {
 // RATE LIMITING - DDoS / Spam Koruması
 // ============================================
 const rateLimitMap = new Map();
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 dakika
-const RATE_LIMIT_MAX = 30;           // 1 dakikada max 30 istek
+const RATE_LIMIT_WINDOW = 60 * 1000;
+const RATE_LIMIT_MAX = 30;
 
 function rateLimit(req, res, next) {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const now = Date.now();
     const entry = rateLimitMap.get(ip);
-
     if (!entry || now - entry.start > RATE_LIMIT_WINDOW) {
         rateLimitMap.set(ip, { start: now, count: 1 });
         return next();
     }
-
     entry.count++;
     if (entry.count > RATE_LIMIT_MAX) {
         return res.status(429).json({ error: 'Çok fazla istek. Lütfen bekleyin.' });
@@ -35,7 +33,6 @@ function rateLimit(req, res, next) {
     next();
 }
 
-// Her 5 dakikada rate limit tablosunu temizle (memory leak önleme)
 setInterval(() => {
     const now = Date.now();
     for (const [ip, entry] of rateLimitMap) {
@@ -47,101 +44,90 @@ setInterval(() => {
 // CACHE - Sunucu Taraflı Önbellek
 // ============================================
 const cache = new Map();
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 DAKİKA cache (eskiden 60 saniyeydi)
-
-// Tüm yayıncıları tek seferde cache'leyen global cache
-let globalCache = null;
-let globalCacheTimestamp = 0;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 dakika
 
 // ============================================
-// HEALTH CHECK - Sunucuyu Canlı Tutma
+// TÜM YAYINCILARI LISTESI
+// ============================================
+const ALL_SLUGS = [
+    'dizci','husamviyuviyu','order','malik','samet',
+    'hobbitemo','omer','kadirdemir','kfistaken','yyiido',
+    'minik','alixmert','yunus','tembik','ekremyaldizkaya',
+    'eray','baran','ayberk','caca','ahmetturku',
+    'spyks26','falconn2k','musti','bonesaures','vaultcreative',
+    'm1ella','ogi','cagatayakman','ersin','ebonivon',
+    'sercanzurna','efeuygac','muratkzlcn','alpnfinalform','mert',
+    'flomore','barisytb','bekirgedik','maxers','simitciabdu'
+];
+
+// ============================================
+// ARKA PLAN VERİ ÇEKİCİ - Her 5 dk otomatik
+// ============================================
+async function fetchSingleStreamer(gotScraping, slug) {
+    try {
+        const response = await gotScraping(`https://kick.com/api/v1/channels/${slug}`);
+        if (response.statusCode === 200) {
+            const data = JSON.parse(response.body);
+            const livestream = data.livestream;
+            let thumbnailUrl = '';
+            if (livestream && livestream.thumbnail) {
+                thumbnailUrl = livestream.thumbnail.url || livestream.thumbnail;
+            }
+            const formattedData = {
+                slug,
+                isLive: Boolean(livestream && livestream.is_live),
+                viewerCount: livestream ? (livestream.viewer_count || 0) : 0,
+                thumbnail: thumbnailUrl,
+                title: livestream ? livestream.session_title : '',
+                profilePicture: data.user?.profile_pic || data.user?.profilepic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${slug}`,
+                category: livestream?.categories?.[0]?.name || livestream?.category?.name || 'Rust'
+            };
+            cache.set(slug, { data: formattedData, timestamp: Date.now() });
+            return formattedData;
+        }
+    } catch (err) {
+        console.error(`[BG] Error ${slug}:`, err.message);
+    }
+    // Hata olursa cache'den eski veriyi kullan
+    const old = cache.get(slug);
+    if (old) return old.data;
+    return { slug, isLive: false, profilePicture: `https://api.dicebear.com/7.x/avataaars/svg?seed=${slug}` };
+}
+
+let bgFetchRunning = false;
+
+async function backgroundFetchAll() {
+    if (bgFetchRunning) return;
+    bgFetchRunning = true;
+    console.log('[BG] Arka plan veri çekme başladı...');
+    
+    try {
+        const { gotScraping } = await import('got-scraping');
+        
+        // 5'erli gruplar halinde çek (Kick rate limit'e takılmamak için)
+        for (let i = 0; i < ALL_SLUGS.length; i += 5) {
+            const chunk = ALL_SLUGS.slice(i, i + 5);
+            await Promise.all(chunk.map(slug => fetchSingleStreamer(gotScraping, slug)));
+            // Gruplar arası 500ms bekle
+            await new Promise(r => setTimeout(r, 500));
+        }
+        
+        console.log(`[BG] Tamamlandı! ${cache.size} yayıncı cache'de.`);
+    } catch (err) {
+        console.error('[BG] Toplu çekme hatası:', err.message);
+    }
+    bgFetchRunning = false;
+}
+
+// ============================================
+// HEALTH CHECK
 // ============================================
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', uptime: process.uptime(), cache_size: cache.size });
 });
 
 // ============================================
-// TÜM YAYINCILARI TEK SEFERDE GETİR (YENİ)
-// ============================================
-app.get('/api/all-streamers', rateLimit, async (req, res) => {
-    // Global cache varsa ve tazeyse, direkt döndür
-    if (globalCache && Date.now() - globalCacheTimestamp < CACHE_TTL_MS) {
-        return res.json(globalCache);
-    }
-
-    try {
-        const { gotScraping } = await import('got-scraping');
-        const allSlugs = [
-            'dizci','husamviyuviyu','order','malik','samet',
-            'hobbitemo','omer','kadirdemir','kfistaken','yyiido',
-            'minik','alixmert','yunus','tembik','ekremyaldizkaya',
-            'eray','baran','ayberk','caca','ahmetturku',
-            'spyks26','falconn2k','musti','bonesaures','vaultcreative',
-            'm1ella','ogi','cagatayakman','ersin','ebonivon',
-            'sercanzurna','efeuygac','muratkzlcn','alpnfinalform','mert',
-            'flomore','barisytb','bekirgedik','maxers','simitciabdu'
-        ];
-
-        const results = [];
-        for (const slug of allSlugs) {
-            // Bireysel cache kontrolü
-            const cached = cache.get(slug);
-            if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-                results.push(cached.data);
-                continue;
-            }
-
-            try {
-                const response = await gotScraping(`https://kick.com/api/v1/channels/${slug}`);
-                if (response.statusCode === 200) {
-                    const data = JSON.parse(response.body);
-                    const livestream = data.livestream;
-                    let thumbnailUrl = '';
-                    if (livestream && livestream.thumbnail) {
-                        thumbnailUrl = livestream.thumbnail.url || livestream.thumbnail;
-                    }
-                    const formattedData = {
-                        slug,
-                        isLive: Boolean(livestream && livestream.is_live),
-                        viewerCount: livestream ? (livestream.viewer_count || 0) : 0,
-                        thumbnail: thumbnailUrl,
-                        title: livestream ? livestream.session_title : '',
-                        profilePicture: data.user?.profile_pic || data.user?.profilepic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${slug}`,
-                        category: livestream?.categories?.[0]?.name || livestream?.category?.name || 'Rust'
-                    };
-                    cache.set(slug, { data: formattedData, timestamp: Date.now() });
-                    results.push(formattedData);
-                } else {
-                    throw new Error(`Kick API returned ${response.statusCode}`);
-                }
-            } catch (err) {
-                console.error(`Error fetching ${slug}:`, err.message);
-                // Cache'de eski veri varsa onu kullan
-                const oldCached = cache.get(slug);
-                if (oldCached) {
-                    results.push(oldCached.data);
-                } else {
-                    results.push({ slug, isLive: false, profilePicture: `https://api.dicebear.com/7.x/avataaars/svg?seed=${slug}` });
-                }
-            }
-            await new Promise(resolve => setTimeout(resolve, 200));
-        }
-
-        // Global cache'i güncelle
-        globalCache = results;
-        globalCacheTimestamp = Date.now();
-
-        res.json(results);
-    } catch (err) {
-        console.error('API Error:', err.message);
-        // Global cache varsa eski veriyi döndür
-        if (globalCache) return res.json(globalCache);
-        res.status(500).json({ error: 'Failed to fetch from Kick API' });
-    }
-});
-
-// ============================================
-// TAKIM BAZLI ENDPOINT (ESKİ - modal için)
+// YAYINCI ENDPOINT (POST - 5'erli gruplar)
 // ============================================
 app.post('/api/streamers', rateLimit, async (req, res) => {
     const slugs = req.body.slugs;
@@ -154,39 +140,16 @@ app.post('/api/streamers', rateLimit, async (req, res) => {
         const results = [];
 
         for (const slug of slugs) {
+            // Cache'de varsa direkt döndür (ANINDA)
             const cached = cache.get(slug);
             if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
                 results.push(cached.data);
                 continue;
             }
 
-            try {
-                const response = await gotScraping(`https://kick.com/api/v1/channels/${slug}`);
-                if (response.statusCode === 200) {
-                    const data = JSON.parse(response.body);
-                    const livestream = data.livestream;
-                    let thumbnailUrl = '';
-                    if (livestream && livestream.thumbnail) {
-                        thumbnailUrl = livestream.thumbnail.url || livestream.thumbnail;
-                    }
-                    const formattedData = {
-                        slug,
-                        isLive: Boolean(livestream && livestream.is_live),
-                        viewerCount: livestream ? (livestream.viewer_count || 0) : 0,
-                        thumbnail: thumbnailUrl,
-                        title: livestream ? livestream.session_title : '',
-                        profilePicture: data.user?.profile_pic || data.user?.profilepic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${slug}`,
-                        category: livestream?.categories?.[0]?.name || livestream?.category?.name || 'Rust'
-                    };
-                    cache.set(slug, { data: formattedData, timestamp: Date.now() });
-                    results.push(formattedData);
-                } else {
-                    throw new Error(`Kick API returned ${response.statusCode}`);
-                }
-            } catch (err) {
-                console.error(`Error fetching ${slug}:`, err.message);
-                results.push({ slug, isLive: false, profilePicture: `https://api.dicebear.com/7.x/avataaars/svg?seed=${slug}` });
-            }
+            // Cache'de yoksa Kick'ten çek
+            const data = await fetchSingleStreamer(gotScraping, slug);
+            results.push(data);
             await new Promise(resolve => setTimeout(resolve, 200));
         }
 
@@ -198,7 +161,7 @@ app.post('/api/streamers', rateLimit, async (req, res) => {
 });
 
 // ============================================
-// SUNUCUYU BAŞLAT
+// SUNUCUYU BAŞLAT + ARKA PLAN ÇEKME
 // ============================================
 const port = process.env.PORT || 3000;
 
@@ -206,6 +169,13 @@ if (!process.env.VERCEL) {
     app.listen(port, () => {
         console.log(`KNGL RUST sunucusu başladı: http://localhost:${port}`);
         console.log(`Cache: ${CACHE_TTL_MS / 1000}s | Rate Limit: ${RATE_LIMIT_MAX}/dk`);
+        
+        // Sunucu açılır açılmaz TÜM yayıncıları çek (cache'i ısıt)
+        console.log('[BG] İlk veri çekme başlatılıyor...');
+        backgroundFetchAll();
+        
+        // Her 5 dakikada bir otomatik güncelle
+        setInterval(backgroundFetchAll, 5 * 60 * 1000);
     });
 }
 
