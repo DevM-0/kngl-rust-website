@@ -851,8 +851,8 @@ function showAdminDashboard() {
     }
 
     if (adminUser.role === 'owner') {
-        badge.style.background = 'rgba(205, 65, 43, 0.2)';
-        badge.style.color = '#e85d3a';
+        document.getElementById('tabUsers').style.display = 'block';
+    } else {
         document.getElementById('tabUsers').style.display = 'none';
     }
 
