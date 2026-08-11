@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="KNGL RUST - Rust etkinliği, takımlar, yayıncılar ve ekip bilgileri.">
+    <title>KNGL RUST | Ana Sayfa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=4">
+</head>
+<body>
+    <!-- Animated Background Particles -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo" style="font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 3px; text-decoration: none; display: flex; align-items: center; font-weight: 400;">
+                <span style="color: #fff; -webkit-text-stroke: 1px #fff;">KNGL</span><span style="color: var(--rust-orange, #e85d3a); margin-left: 8px; -webkit-text-stroke: 1px var(--rust-orange, #e85d3a);">RUST</span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="#anasayfa" class="nav-link active" data-text="Ana Sayfa">
+                    <span>Ana Sayfa</span>
+                    <div class="nav-link-glow"></div>
+                </a>
+                <a href="#takimlar" class="nav-link" data-text="Takımlar">
+                    <span>Takımlar</span>
+                    <div class="nav-link-glow"></div>
+                </a>
+                <a href="#yayincilar" class="nav-link" data-text="Yayıncılar">
+                    <span>Yayıncılar</span>
+                    <div class="nav-link-glow"></div>
+                </a>
+                <a href="#kurallar" class="nav-link" data-text="Kurallar">
+                    <span>Kurallar</span>
+                    <div class="nav-link-glow"></div>
+                </a>
+            </div>
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Menüyü aç">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="anasayfa">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="title-line">KNGL</span>
+                <span class="title-line title-rust">RUST</span>
+            </h1>
+
+            <!-- Elapsed Time Counter -->
+            <div style="margin: 30px auto; text-align: center;">
+                <p style="font-family: 'Inter', sans-serif; font-size: 0.75rem; color: #888; letter-spacing: 3px; text-transform: uppercase; margin: 0 0 12px;">BAŞLANGIÇ</p>
+                <div id="elapsed-timer" style="display: flex; gap: 6px; justify-content: center; align-items: baseline;">
+                    <span id="timer-hours" style="font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: #e85d3a; line-height: 1; text-shadow: 0 0 25px rgba(232,93,58,0.4);">00</span>
+                    <span style="font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; color: rgba(255,255,255,0.2); line-height: 1;">.</span>
+                    <span id="timer-minutes" style="font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: #fff; line-height: 1;">00</span>
+                    <span style="font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; color: rgba(255,255,255,0.2); line-height: 1;">.</span>
+                    <span id="timer-seconds" style="font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: #e85d3a; line-height: 1; text-shadow: 0 0 25px rgba(232,93,58,0.4);">00</span>
+                </div>
+                <p style="font-family: 'Inter', sans-serif; font-size: 0.65rem; color: #555; letter-spacing: 2px; margin: 6px 0 0;">SAAT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DAKİKA &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SANİYE</p>
+            </div>
+
+            <div class="hero-stats" style="margin-top: 30px;">
+                <div class="stat-item">
+                    <span class="stat-number">8</span>
+                    <span class="stat-label">Takım</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">40</span>
+                    <span class="stat-label">Oyuncu</span>
+                </div>
+            </div>
+            <div class="hero-actions" style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <a href="#takimlar" class="btn btn-primary">
+                    <span>Takımlar</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+                <a href="#yayincilar" class="btn btn-primary">
+                    <span>Yayıncılar</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+                <a href="#kurallar" class="btn btn-primary">
+                    <span>Kurallar</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+        <div onclick="document.getElementById('takimlar').scrollIntoView({behavior:'smooth'});" style="cursor:pointer; position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 10;">
+            <span style="font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #666; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 8px;">Aşağı Kaydır</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" style="animation: bounce 2s infinite;">
+                <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Teams Section -->
+    <section class="section" id="takimlar" style="position: relative;">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">TAKIMLAR</span>
+                <h2 class="section-title">Takımlar</h2>
+            </div>
+
+            <div class="teams-grid" id="teamsGrid">
+                <!-- Cards rendered by script.js -->
+            </div>
+        </div>
+        <div onclick="document.getElementById('yayincilar').scrollIntoView({behavior:'smooth'});" style="cursor:pointer; text-align: center; margin-top: 40px; padding-bottom: 10px;">
+            <span style="font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #555; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 6px;">Aşağı Kaydır</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" style="animation: bounce 2s infinite;"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </div>
+    </section>
+
+    <!-- Streamers Section -->
+    <section class="section section-alt" id="yayincilar" style="position: relative;">
+        <div class="container">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <span class="section-tag">YAYINCILAR</span>
+                    <h2 class="section-title">Yayıncılar</h2>
+                </div>
+                <div class="live-counter" style="display: flex; align-items: center; gap: 8px; background: rgba(231,76,60,0.15); border: 1px solid rgba(231,76,60,0.3); padding: 8px 16px; border-radius: 8px;">
+                    <span class="live-dot" style="width: 8px; height: 8px; background: #e74c3c; border-radius: 50%; animation: pulse 2s infinite;"></span>
+                    <span id="mainLiveCounter" style="color: #e74c3c; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem;">0 canlı</span>
+                </div>
+            </div>
+
+            <div class="streamers-grid" id="mainStreamersGrid">
+                <!-- Loading State -->
+                <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 0; gap: 20px;">
+                    <div style="width: 50px; height: 50px; border: 4px solid rgba(255, 255, 255, 0.1); border-top-color: var(--rust-orange); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <p style="color: var(--text-secondary); font-family: var(--font-heading); font-size: 1.2rem; letter-spacing: 1px;">Yayıncı Verileri Yükleniyor...</p>
+                </div>
+            </div>
+        </div>
+        <div onclick="document.getElementById('kurallar').scrollIntoView({behavior:'smooth'});" style="cursor:pointer; text-align: center; margin-top: 40px; padding-bottom: 10px;">
+            <span style="font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #555; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 6px;">Aşağı Kaydır</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" style="animation: bounce 2s infinite;"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </div>
+    </section>
+
+    <!-- Rules Section -->
+    <section class="section section-alt" id="kurallar">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">KURALLAR</span>
+                <h2 class="section-title">Kurallar</h2>
+            </div>
+            <div class="rules-columns" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 40px; align-items: start;">
+                <div class="rules-list">
+                    <div class="rule-item"><div class="rule-number">01</div><div class="rule-content"><h3>Canlı Yayın Şartı</h3><p>Takımınızda canlı yayın yoksa takımdan kimse oyuna giremez.</p></div></div>
+                    <div class="rule-item"><div class="rule-number">02</div><div class="rule-content"><h3>Workbench İlerlemesi</h3><p>İlk 1 gün sadece WB1, ardından 2 gün boyunca maksimum WB2, sonrasında WB3'e geçilecek.</p></div></div>
+                    <div class="rule-item"><div class="rule-number">03</div><div class="rule-content"><h3>Upkeep ve Base Kuralları</h3><p>Upkeep sınırı yok (Kapılar HQ olabilir, geri kalan full metal) (Sınırsız diye abartmayın amk).</p></div></div>
+                    <div class="rule-item"><div class="rule-number">04</div><div class="rule-content"><h3>Taret Sınırı</h3><p>Taret sınırı maks 20 ve taret base olmayacak.</p></div></div>
+                </div>
+                <div class="rules-list">
+                    <div class="rule-item"><div class="rule-number">05</div><div class="rule-content"><h3>Saygı ve Davranış</h3><p>Kendi takımına saygısızlık yapan olursa direkt atılacak.</p></div></div>
+                    <div class="rule-item"><div class="rule-number">06</div><div class="rule-content"><h3>Tier 4 Event</h3><p>Kendi takımın hariç 15 online olmadan yapılamaz. (Devasa Kazıcı, Tank, Gemi)</p></div></div>
+                    <div class="rule-item"><div class="rule-number">07</div><div class="rule-content"><h3>Tier 3 Event</h3><p>Kendi takımın hariç 12 online olmadan yapılamaz. (Big oil, askeri tünel, füze silosu, Helikopter, fırlatma sahası)</p></div></div>
+                    <div class="rule-item"><div class="rule-number">08</div><div class="rule-content"><h3>Tier 2 Event</h3><p>Kendi takımın hariç 8 online olmadan yapılamaz. (Oil, Derin Deniz)</p></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js?v=4"></script>
+</body>
+</html>

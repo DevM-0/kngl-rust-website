@@ -1,0 +1,14 @@
+{
+  "name": "kngl-rust-website",
+  "version": "1.0.0",
+  "description": "KNGL RUST Event Website",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "got-scraping": "^4.2.1"
+  }
+}
