@@ -726,6 +726,12 @@ window.addEventListener('hashchange', () => {
 // Oturum kontrolü
 (async function checkAdminSession() {
     if (!adminToken) return;
+    
+    // Optimistic UI - Beklemeden admin panelini göster
+    document.getElementById('adminNavLink').style.display = 'flex';
+    document.getElementById('adminNavInfo').style.display = 'flex';
+    document.getElementById('adminpanel').style.display = 'block';
+
     try {
         const res = await fetch(ADMIN_API + '/api/admin/me', {
             headers: { 'Authorization': 'Bearer ' + adminToken }
@@ -734,8 +740,7 @@ window.addEventListener('hashchange', () => {
             adminUser = await res.json();
             showAdminDashboard();
         } else {
-            localStorage.removeItem('kngl_admin_token');
-            adminToken = null;
+            adminLogout();
         }
     } catch (e) {
         console.error('Admin session check failed:', e);
@@ -937,13 +942,15 @@ async function loadAdminClips() {
         
         const displayClips = clips.slice(0, 6);
         container.innerHTML = displayClips.map(clip => `
-            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(20,20,22,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:10px;">
-                <img src="${clip.thumbnail}" style="width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:#111;">
-                <div style="flex:1;min-width:180px;">
-                    <input type="text" value="${clip.title || ''}" id="clipTitle_${clip.id}" style="width:100%;padding:6px 10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:var(--text-primary);font-family:'Rajdhani',sans-serif;font-weight:600;outline:none;font-size:0.95rem;">
-                    <p style="color:var(--text-tertiary);font-size:0.8rem;margin-top:4px;">${clip.channelName} • ${formatClipDuration(clip.duration || 0)} • ${clip.views || 0} izlenme</p>
+            <div style="display:flex;flex-direction:column;gap:12px;padding:12px;background:rgba(20,20,22,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:10px;">
+                <div style="display:flex;gap:12px;">
+                    <img src="${clip.thumbnail}" style="width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:#111;">
+                    <div style="flex:1;min-width:140px;">
+                        <input type="text" value="${clip.title || ''}" id="clipTitle_${clip.id}" style="width:100%;padding:6px 10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:var(--text-primary);font-family:'Rajdhani',sans-serif;font-weight:600;outline:none;font-size:0.95rem;">
+                        <p style="color:var(--text-tertiary);font-size:0.8rem;margin-top:4px;">${clip.channelName} • ${formatClipDuration(clip.duration || 0)} • ${clip.views || 0} izlenme</p>
+                    </div>
                 </div>
-                <div style="display:flex;gap:8px;">
+                <div style="display:flex;gap:8px;justify-content:flex-end;">
                     <button onclick="editClipTitle('${clip.id}')" style="padding:6px 14px;background:rgba(59,130,246,0.2);color:#3b82f6;border:1px solid rgba(59,130,246,0.3);border-radius:6px;font-family:'Rajdhani',sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Kaydet</button>
                     <button onclick="deleteClip('${clip.id}')" style="padding:6px 14px;background:rgba(239,68,68,0.2);color:#ef4444;border:1px solid rgba(239,68,68,0.3);border-radius:6px;font-family:'Rajdhani',sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Sil</button>
                 </div>
