@@ -157,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let current = '';
         sections.forEach(section => {
+            if (section.style.display === 'none' || section.offsetHeight === 0) return;
             const sectionTop = section.offsetTop;
             // Add offset to make it switch a bit earlier
             if (window.scrollY >= (sectionTop - 300)) {
@@ -809,15 +810,19 @@ function showAdminDashboard() {
     }
     
     // Kullanıcı bilgisi
-    document.getElementById('adminUserInfo').textContent = adminUser.username;
     const badge = document.getElementById('adminRoleBadge');
-    badge.textContent = adminUser.role.toUpperCase();
-    if (adminUser.role === 'owner') {
-        badge.style.background = 'rgba(234, 179, 8, 0.2)';
-        badge.style.color = '#eab308';
+    if (badge) {
+        badge.textContent = adminUser.role.toUpperCase();
+        if (adminUser.role === 'owner') {
+            badge.style.background = 'rgba(234, 179, 8, 0.2)';
+            badge.style.color = '#eab308';
+        } else {
+            badge.style.background = 'rgba(205, 65, 43, 0.2)';
+            badge.style.color = '#e85d3a';
+        }
+    }
 
-        document.getElementById('tabUsers').style.display = 'block';
-    } else {
+    if (adminUser.role === 'owner') {
         badge.style.background = 'rgba(205, 65, 43, 0.2)';
         badge.style.color = '#e85d3a';
         document.getElementById('tabUsers').style.display = 'none';
@@ -907,13 +912,13 @@ async function addClip() {
         document.getElementById('clipPreview').style.display = 'none';
         loadAdminClips();
         loadClipsPreview(); // Ana sayfadaki önizlemeyi de güncelle
-        alert('Klip başarıyla eklendi!');
+        showToast('Klip başarıyla eklendi!', 'success');
     } catch (e) {
-        alert('Hata: ' + e.message);
+        showToast('Hata: ' + e.message, 'error');
     }
 }
 
-// Admin klip listesi
+// Admin klip listesi (Grid Layout, Max 6)
 async function loadAdminClips() {
     const container = document.getElementById('adminClipsList');
     const countEl = document.getElementById('adminClipCount');
@@ -925,8 +930,14 @@ async function loadAdminClips() {
             container.innerHTML = '<p style="text-align:center;color:var(--text-tertiary);padding:40px;font-family:Rajdhani,sans-serif;font-size:1.1rem;">Henüz klip eklenmemiş.</p>';
             return;
         }
-        container.innerHTML = clips.map(clip => `
-            <div style="display:flex;align-items:center;gap:16px;padding:14px;background:rgba(20,20,22,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:10px;flex-wrap:wrap;">
+        
+        container.style.display = 'grid';
+        container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(320px, 1fr))';
+        container.style.gap = '16px';
+        
+        const displayClips = clips.slice(0, 6);
+        container.innerHTML = displayClips.map(clip => `
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(20,20,22,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:10px;">
                 <img src="${clip.thumbnail}" style="width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:#111;">
                 <div style="flex:1;min-width:180px;">
                     <input type="text" value="${clip.title || ''}" id="clipTitle_${clip.id}" style="width:100%;padding:6px 10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:var(--text-primary);font-family:'Rajdhani',sans-serif;font-weight:600;outline:none;font-size:0.95rem;">
@@ -952,24 +963,26 @@ async function editClipTitle(id) {
             body: JSON.stringify({ title })
         });
         if (res.ok) {
-            alert('Başlık güncellendi!');
+            showToast('Başlık güncellendi!', 'success');
             loadClipsPreview();
         }
-    } catch (e) { alert('Hata: ' + e.message); }
+    } catch (e) { showToast('Hata: ' + e.message, 'error'); }
 }
 
 async function deleteClip(id) {
-    if (!confirm('Bu klibi silmek istediğine emin misin?')) return;
-    try {
-        const res = await fetch(ADMIN_API + '/api/clips/' + id, {
-            method: 'DELETE',
-            headers: { 'Authorization': 'Bearer ' + adminToken }
-        });
-        if (res.ok) {
-            loadAdminClips();
-            loadClipsPreview();
-        }
-    } catch (e) { alert('Hata: ' + e.message); }
+    customConfirm('Bu klibi silmek istediğine emin misin?', async () => {
+        try {
+            const res = await fetch(ADMIN_API + '/api/clips/' + id, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + adminToken }
+            });
+            if (res.ok) {
+                showToast('Klip silindi', 'success');
+                loadAdminClips();
+                loadClipsPreview();
+            }
+        } catch (e) { showToast('Hata: ' + e.message, 'error'); }
+    });
 }
 
 // Kullanıcı yönetimi
@@ -995,7 +1008,7 @@ async function loadAdminUsers() {
 async function createAdmin() {
     const username = document.getElementById('newAdminUsername').value.trim();
     const password = document.getElementById('newAdminPassword').value;
-    if (!username || !password || password.length < 6) return alert('Kullanıcı adı ve şifre (min 6 karakter) gerekli');
+    if (!username || !password || password.length < 6) return showToast('Kullanıcı adı ve şifre (min 6 karakter) gerekli', 'error');
 
     try {
         const res = await fetch(ADMIN_API + '/api/admin/create-user', {
@@ -1008,17 +1021,21 @@ async function createAdmin() {
         document.getElementById('newAdminUsername').value = '';
         document.getElementById('newAdminPassword').value = '';
         loadAdminUsers();
-        alert('Admin oluşturuldu: ' + username);
-    } catch (e) { alert('Hata: ' + e.message); }
+        showToast('Admin oluşturuldu: ' + username, 'success');
+    } catch (e) { showToast('Hata: ' + e.message, 'error'); }
 }
 
 async function deleteUser(id) {
-    if (!confirm('Bu admini silmek istediğine emin misin?')) return;
-    try {
-        const res = await fetch(ADMIN_API + '/api/admin/users/' + id, {
-            method: 'DELETE',
-            headers: { 'Authorization': 'Bearer ' + adminToken }
-        });
-        if (res.ok) loadAdminUsers();
-    } catch (e) { alert('Hata: ' + e.message); }
+    customConfirm('Bu admini silmek istediğine emin misin?', async () => {
+        try {
+            const res = await fetch(ADMIN_API + '/api/admin/users/' + id, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + adminToken }
+            });
+            if (res.ok) {
+                showToast('Admin silindi', 'success');
+                loadAdminUsers();
+            }
+        } catch (e) { showToast('Hata: ' + e.message, 'error'); }
+    });
 }
