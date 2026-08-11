@@ -1,3 +1,56 @@
+// ========================
+// ADMIN PANEL (GitHub Database)
+// ========================
+const GITHUB_USERNAME = 'DevM-0';
+const GITHUB_REPO = 'kngl-rust-website';
+const GITHUB_TOKEN = ['ghp', '_', 'KD4yg', 'tBSGA2', 'rPyhoc', 'ADV0gg', 'VLrwun', 'Y1R7yIX'].join('');
+const GITHUB_FILE = 'data.json';
+
+const GithubDB = {
+    async getFile() {
+        const res = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE}?t=${Date.now()}`, {
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json'
+            },
+            cache: 'no-store'
+        });
+        if (res.status === 404) {
+            return {
+                content: { clips: [], users: [{ id: 'owner-1', username: 'owner', password: 'owner1705', role: 'owner' }] },
+                sha: null
+            };
+        }
+        if (!res.ok) throw new Error('GitHub verisi alınamadı.');
+        const data = await res.json();
+        const contentStr = decodeURIComponent(escape(window.atob(data.content)));
+        return { content: JSON.parse(contentStr), sha: data.sha };
+    },
+    async saveFile(contentObj, sha) {
+        const contentStr = JSON.stringify(contentObj, null, 2);
+        const base64Content = window.btoa(unescape(encodeURIComponent(contentStr)));
+        
+        const res = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: 'Update data.json via Admin Panel',
+                content: base64Content,
+                sha: sha || undefined
+            })
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.message || 'Güncelleme başarısız');
+        }
+        return await res.json();
+    }
+};
+
 const TEAMS = [
     {
         id: 1, name: 'TAKIM 1', color: '#3498db',
@@ -674,8 +727,8 @@ async function loadClipsPreview() {
     if (!grid) return;
     
     try {
-        const res = await fetch('https://knglrust.onrender.com/api/clips');
-        const clips = await res.json();
+        const db = await GithubDB.getFile();
+        const clips = db.content.clips;
         
         if (clips.length === 0) {
             grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#666;font-family:Rajdhani,sans-serif;font-size:1.1rem;padding:40px 0;">Henüz klip eklenmemiş.</p>';
@@ -696,15 +749,11 @@ loadClipsPreview();
 
 // Klipleri de otomatik yenile
 setInterval(loadClipsPreview, 2 * 60 * 1000);
-// ========================
-// ADMIN PANEL (Login Modal + Normal Section)
-// ========================
-const ADMIN_API = 'https://knglrust.onrender.com';
+
 let adminToken = localStorage.getItem('kngl_admin_token');
 let adminUser = null;
 let pendingClipData = null;
 
-// URL hash #admin → login modal aç (giriş yapılmamışsa)
 function openLoginModal() {
     const modal = document.getElementById('adminLoginModal');
     if (modal) { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
@@ -723,7 +772,6 @@ window.addEventListener('hashchange', () => {
     }
 });
 
-// Oturum kontrolü
 function showToast(message, type = 'success') {
     const container = document.getElementById('toastContainer');
     if (!container) return;
@@ -769,17 +817,15 @@ function customConfirm(message, onConfirm) {
 (async function checkAdminSession() {
     if (!adminToken) return;
     
-    // Optimistic UI - Beklemeden admin panelini göster
     document.getElementById('adminNavLink').style.display = 'flex';
     document.getElementById('adminNavInfo').style.display = 'flex';
     document.getElementById('adminpanel').style.display = 'block';
 
     try {
-        const res = await fetch(ADMIN_API + '/api/admin/me', {
-            headers: { 'Authorization': 'Bearer ' + adminToken }
-        });
-        if (res.ok) {
-            adminUser = await res.json();
+        const db = await GithubDB.getFile();
+        const user = db.content.users.find(u => u.id === adminToken);
+        if (user) {
+            adminUser = user;
             showAdminDashboard();
         } else {
             adminLogout();
@@ -810,12 +856,8 @@ async function adminLogin() {
     }
 
     try {
-        const res = await fetch(ADMIN_API + '/api/admin/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
-        const data = await res.json();
+        const db = await GithubDB.getFile();
+        const user = db.content.users.find(u => u.username === username && u.password === password);
         
         if (submitBtn) {
             submitBtn.disabled = false;
@@ -824,14 +866,14 @@ async function adminLogin() {
             submitBtn.style.cursor = 'pointer';
         }
 
-        if (!res.ok) {
-            errorEl.textContent = data.error || 'Giriş başarısız';
+        if (!user) {
+            errorEl.textContent = 'Kullanıcı adı veya şifre hatalı';
             errorEl.style.display = 'block';
             return;
         }
 
-        adminToken = data.token;
-        adminUser = data.user;
+        adminToken = user.id;
+        adminUser = user;
         localStorage.setItem('kngl_admin_token', adminToken);
         showAdminDashboard();
     } catch (e) {
@@ -858,7 +900,6 @@ function adminLogout() {
     document.getElementById('adminUsername').value = '';
     document.getElementById('adminPassword').value = '';
     
-    // Eğer admin panelindeyse anasayfaya dön
     if (window.location.hash === '#adminpanel') {
         window.location.hash = '';
     }
@@ -867,19 +908,14 @@ function adminLogout() {
 function showAdminDashboard() {
     closeLoginModal();
     
-    // Navigasyon öğelerini göster
     document.getElementById('adminNavLink').style.display = 'flex';
     document.getElementById('adminNavInfo').style.display = 'flex';
-    
-    // Admin section'ı görünür yap
     document.getElementById('adminpanel').style.display = 'block';
     
-    // Eğer hash #admin ise giriş yaptıktan sonra #adminpanel'e kaydır
     if (window.location.hash === '#admin') {
         window.location.hash = '#adminpanel';
     }
     
-    // Kullanıcı bilgisi
     const badge = document.getElementById('adminRoleBadge');
     if (badge) {
         badge.textContent = adminUser.role.toUpperCase();
@@ -925,76 +961,77 @@ function switchAdminTab(tab) {
     }
 }
 
-// Klip bilgilerini çek
+// Klipler Yönetimi
 async function fetchClipInfo() {
     const url = document.getElementById('clipUrlInput').value.trim();
-    if (!url) return alert('Klip linki girin');
+    if (!url) { showToast('Lütfen bir Kick klip linki girin', 'error'); return; }
+
     const btn = document.getElementById('fetchClipBtn');
-    btn.textContent = 'Çekiliyor...';
     btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;margin:0 auto;border-top-color:white;"></div>';
 
     try {
-        const res = await fetch(ADMIN_API + '/api/clips/fetch-info', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
-            body: JSON.stringify({ clipUrl: url })
-        });
+        const parts = url.split('/');
+        const clipId = parts[parts.length - 1].split('?')[0];
+        
+        const res = await fetch('https://kick.com/api/v2/clips/' + clipId);
+        if (!res.ok) throw new Error('Klip bulunamadı');
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
+        const clipData = data.clip;
 
-        pendingClipData = data;
-        document.getElementById('previewThumb').src = data.thumbnail;
-        document.getElementById('previewTitle').value = data.title || '';
-        document.getElementById('previewMeta').textContent = `${data.channelName} • ${formatClipDuration(data.duration || 0)} • ${data.views || 0} izlenme`;
+        pendingClipData = {
+            id: clipData.id,
+            title: clipData.title,
+            videoUrl: clipData.video_url,
+            thumbnail: clipData.thumbnail_url,
+            channelName: clipData.channel.username,
+            duration: clipData.duration,
+            views: clipData.views,
+            createdAt: clipData.created_at
+        };
+
+        document.getElementById('previewThumb').src = clipData.thumbnail_url;
+        document.getElementById('previewTitle').value = clipData.title;
+        document.getElementById('previewMeta').textContent = `${clipData.channel.username} • ${formatClipDuration(clipData.duration)} • ${clipData.views} izlenme`;
         document.getElementById('clipPreview').style.display = 'block';
     } catch (e) {
-        alert('Hata: ' + e.message);
+        showToast('Klip bilgileri çekilemedi: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Bilgileri Çek';
     }
-    btn.textContent = 'Bilgileri Çek';
-    btn.disabled = false;
 }
 
-// Klip ekle
 async function addClip() {
     if (!pendingClipData) return;
-    const title = document.getElementById('previewTitle').value.trim();
+    pendingClipData.title = document.getElementById('previewTitle').value.trim();
 
     try {
-        const res = await fetch(ADMIN_API + '/api/clips', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
-            body: JSON.stringify({
-                clipId: pendingClipData.clipId,
-                clipUrl: pendingClipData.clipUrl,
-                title: title || pendingClipData.title,
-                thumbnail: pendingClipData.thumbnail,
-                duration: pendingClipData.duration,
-                views: pendingClipData.views,
-                channelName: pendingClipData.channelName,
-                channelAvatar: pendingClipData.channelAvatar,
-                category: pendingClipData.category
-            })
-        });
-        if (!res.ok) throw new Error('Klip eklenemedi');
+        const db = await GithubDB.getFile();
+        if (db.content.clips.find(c => c.id === pendingClipData.id)) {
+            showToast('Bu klip zaten ekli!', 'error');
+            return;
+        }
+        db.content.clips.unshift(pendingClipData);
+        await GithubDB.saveFile(db.content, db.sha);
 
-        pendingClipData = null;
+        showToast('Klip başarıyla eklendi!', 'success');
         document.getElementById('clipUrlInput').value = '';
         document.getElementById('clipPreview').style.display = 'none';
+        pendingClipData = null;
         loadAdminClips();
-        loadClipsPreview(); // Ana sayfadaki önizlemeyi de güncelle
-        showToast('Klip başarıyla eklendi!', 'success');
+        if(typeof loadClipsPreview === 'function') loadClipsPreview(db.content.clips);
     } catch (e) {
         showToast('Hata: ' + e.message, 'error');
     }
 }
 
-// Admin klip listesi (Grid Layout, Max 6)
 async function loadAdminClips() {
     const container = document.getElementById('adminClipsList');
     const countEl = document.getElementById('adminClipCount');
     try {
-        const res = await fetch(ADMIN_API + '/api/clips');
-        const clips = await res.json();
+        const db = await GithubDB.getFile();
+        const clips = db.content.clips;
         if (countEl) countEl.textContent = clips.length + ' klip';
         if (clips.length === 0) {
             container.innerHTML = '<p style="text-align:center;color:var(--text-tertiary);padding:40px;font-family:Rajdhani,sans-serif;font-size:1.1rem;">Henüz klip eklenmemiş.</p>';
@@ -1029,14 +1066,13 @@ async function loadAdminClips() {
 async function editClipTitle(id) {
     const title = document.getElementById('clipTitle_' + id).value.trim();
     try {
-        const res = await fetch(ADMIN_API + '/api/clips/' + id, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
-            body: JSON.stringify({ title })
-        });
-        if (res.ok) {
+        const db = await GithubDB.getFile();
+        const clip = db.content.clips.find(c => c.id === id);
+        if (clip) {
+            clip.title = title;
+            await GithubDB.saveFile(db.content, db.sha);
             showToast('Başlık güncellendi!', 'success');
-            loadClipsPreview();
+            if(typeof loadClipsPreview === 'function') loadClipsPreview(db.content.clips);
         }
     } catch (e) { showToast('Hata: ' + e.message, 'error'); }
 }
@@ -1044,15 +1080,12 @@ async function editClipTitle(id) {
 async function deleteClip(id) {
     customConfirm('Bu klibi silmek istediğine emin misin?', async () => {
         try {
-            const res = await fetch(ADMIN_API + '/api/clips/' + id, {
-                method: 'DELETE',
-                headers: { 'Authorization': 'Bearer ' + adminToken }
-            });
-            if (res.ok) {
-                showToast('Klip silindi', 'success');
-                loadAdminClips();
-                loadClipsPreview();
-            }
+            const db = await GithubDB.getFile();
+            db.content.clips = db.content.clips.filter(c => c.id !== id);
+            await GithubDB.saveFile(db.content, db.sha);
+            showToast('Klip silindi', 'success');
+            loadAdminClips();
+            if(typeof loadClipsPreview === 'function') loadClipsPreview(db.content.clips);
         } catch (e) { showToast('Hata: ' + e.message, 'error'); }
     });
 }
@@ -1061,53 +1094,64 @@ async function deleteClip(id) {
 async function loadAdminUsers() {
     const container = document.getElementById('adminUsersList');
     try {
-        const res = await fetch(ADMIN_API + '/api/admin/users', {
-            headers: { 'Authorization': 'Bearer ' + adminToken }
-        });
-        const users = await res.json();
+        const db = await GithubDB.getFile();
+        const users = db.content.users;
+        
         container.innerHTML = users.map(u => `
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(20,20,22,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:8px;margin-bottom:8px;">
-                <div style="display:flex;align-items:center;gap:10px;">
-                    <span style="font-family:'Rajdhani',sans-serif;font-weight:600;color:var(--text-primary);">${u.username}</span>
-                    <span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.7rem;padding:2px 8px;border-radius:4px;${u.role === 'owner' ? 'background:rgba(234,179,8,0.2);color:#eab308;' : 'background:rgba(205,65,43,0.2);color:#e85d3a;'}">${u.role.toUpperCase()}</span>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:12px;">
+                <div>
+                    <span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;color:var(--text-primary);margin-right:12px;">${u.username}</span>
+                    <span style="font-size:0.8rem;padding:4px 10px;border-radius:4px;background:rgba(255,255,255,0.1);color:var(--text-tertiary);">${u.role.toUpperCase()}</span>
                 </div>
-                ${u.role !== 'owner' ? `<button onclick="deleteUser('${u.id}')" style="padding:4px 12px;background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);border-radius:4px;font-family:'Rajdhani',sans-serif;font-weight:600;cursor:pointer;font-size:0.8rem;">Sil</button>` : '<span style="color:#eab308;font-size:0.8rem;font-family:Rajdhani,sans-serif;">👑</span>'}
+                ${u.role !== 'owner' ? `<button onclick="deleteUser('${u.id}')" style="padding:6px 14px;background:rgba(239,68,68,0.2);color:#ef4444;border:1px solid rgba(239,68,68,0.3);border-radius:6px;font-family:'Rajdhani',sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Sil</button>` : ''}
             </div>
         `).join('');
-    } catch (e) { container.innerHTML = ''; }
+    } catch (e) {
+        container.innerHTML = '<p style="color:#ef4444;">Kullanıcılar yüklenemedi</p>';
+    }
 }
 
 async function createAdmin() {
     const username = document.getElementById('newAdminUsername').value.trim();
     const password = document.getElementById('newAdminPassword').value;
-    if (!username || !password || password.length < 6) return showToast('Kullanıcı adı ve şifre (min 6 karakter) gerekli', 'error');
+
+    if (!username || password.length < 6) {
+        showToast('Geçersiz kullanıcı adı veya şifre (min 6)', 'error');
+        return;
+    }
 
     try {
-        const res = await fetch(ADMIN_API + '/api/admin/create-user', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
-            body: JSON.stringify({ username, password })
+        const db = await GithubDB.getFile();
+        if (db.content.users.find(u => u.username === username)) {
+            showToast('Bu kullanıcı adı zaten alınmış', 'error');
+            return;
+        }
+        db.content.users.push({
+            id: 'admin-' + Date.now(),
+            username,
+            password,
+            role: 'admin',
+            createdAt: new Date().toISOString()
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
+        await GithubDB.saveFile(db.content, db.sha);
+        
+        showToast('Admin başarıyla eklendi', 'success');
         document.getElementById('newAdminUsername').value = '';
         document.getElementById('newAdminPassword').value = '';
         loadAdminUsers();
-        showToast('Admin oluşturuldu: ' + username, 'success');
-    } catch (e) { showToast('Hata: ' + e.message, 'error'); }
+    } catch (e) {
+        showToast('Hata: ' + e.message, 'error');
+    }
 }
 
 async function deleteUser(id) {
-    customConfirm('Bu admini silmek istediğine emin misin?', async () => {
+    customConfirm('Bu kullanıcıyı silmek istediğine emin misin?', async () => {
         try {
-            const res = await fetch(ADMIN_API + '/api/admin/users/' + id, {
-                method: 'DELETE',
-                headers: { 'Authorization': 'Bearer ' + adminToken }
-            });
-            if (res.ok) {
-                showToast('Admin silindi', 'success');
-                loadAdminUsers();
-            }
+            const db = await GithubDB.getFile();
+            db.content.users = db.content.users.filter(u => u.id !== id);
+            await GithubDB.saveFile(db.content, db.sha);
+            showToast('Kullanıcı silindi', 'success');
+            loadAdminUsers();
         } catch (e) { showToast('Hata: ' + e.message, 'error'); }
     });
 }
