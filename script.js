@@ -511,12 +511,24 @@ async function fetchAndRenderMainStreamers() {
         renderStreamersToGrid(mergedCached, mainGrid, liveCounter);
     }
 
-    // 2) Arka planda taze veriyi çek (TEK İSTEK - GET)
+    // 2) Arka planda taze veriyi çek (5'erli POST - güvenilir)
     try {
-        const apiUrl = 'https://knglrust.onrender.com/api/all-streamers';
-        const res = await fetch(apiUrl);
-        if (!res.ok) throw new Error('API error');
-        const fetchedData = await res.json();
+        const justSlugs = allSlugs.map(s => s.slug);
+        let fetchedData = [];
+        const chunkSize = 5;
+
+        for (let i = 0; i < justSlugs.length; i += chunkSize) {
+            const chunk = justSlugs.slice(i, i + chunkSize);
+            const apiUrl = 'https://knglrust.onrender.com/api/streamers';
+            const res = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ slugs: chunk })
+            });
+            if (!res.ok) throw new Error('Proxy error');
+            const data = await res.json();
+            fetchedData.push(...data);
+        }
 
         // Cache'e kaydet
         setCachedStreamers(fetchedData);
