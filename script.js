@@ -695,33 +695,35 @@ loadClipsPreview();
 
 // Klipleri de otomatik yenile
 setInterval(loadClipsPreview, 2 * 60 * 1000);
-
 // ========================
-// ADMIN PANEL
+// ADMIN PANEL (Full-Screen Overlay)
 // ========================
 const ADMIN_API = 'https://knglrust.onrender.com';
 let adminToken = localStorage.getItem('kngl_admin_token');
 let adminUser = null;
 let pendingClipData = null;
 
-// Sayfa yüklendiğinde oturum kontrolü + URL hash kontrolü
-function showAdminSection() {
-    const adminSection = document.getElementById('admin');
-    const adminNavLink = document.getElementById('adminNavLink');
-    if (adminSection) adminSection.style.display = 'block';
-    if (adminNavLink) adminNavLink.style.display = 'flex';
+// URL hash #admin → overlay'i aç
+function openAdminOverlay() {
+    document.getElementById('adminOverlay').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+function closeAdminOverlay() {
+    document.getElementById('adminOverlay').style.display = 'none';
+    document.body.style.overflow = '';
+    window.location.hash = '';
 }
 
-// URL hash #admin ise admin bölümünü göster
 if (window.location.hash === '#admin') {
-    showAdminSection();
+    openAdminOverlay();
 }
 window.addEventListener('hashchange', () => {
     if (window.location.hash === '#admin') {
-        showAdminSection();
+        openAdminOverlay();
     }
 });
 
+// Oturum kontrolü
 (async function checkAdminSession() {
     if (!adminToken) return;
     try {
@@ -730,6 +732,7 @@ window.addEventListener('hashchange', () => {
         });
         if (res.ok) {
             adminUser = await res.json();
+            openAdminOverlay();
             showAdminDashboard();
         } else {
             localStorage.removeItem('kngl_admin_token');
@@ -778,17 +781,14 @@ function adminLogout() {
     adminToken = null;
     adminUser = null;
     localStorage.removeItem('kngl_admin_token');
-    document.getElementById('adminLogin').style.display = 'block';
+    document.getElementById('adminLoginScreen').style.display = 'flex';
     document.getElementById('adminDashboard').style.display = 'none';
     document.getElementById('adminUsername').value = '';
     document.getElementById('adminPassword').value = '';
 }
 
 function showAdminDashboard() {
-    // Admin bölümünü ve nav linkini göster
-    document.getElementById('admin').style.display = 'block';
-    document.getElementById('adminNavLink').style.display = 'flex';
-    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminLoginScreen').style.display = 'none';
     document.getElementById('adminDashboard').style.display = 'block';
     
     // Kullanıcı bilgisi
@@ -798,6 +798,7 @@ function showAdminDashboard() {
     if (adminUser.role === 'owner') {
         badge.style.background = 'rgba(234, 179, 8, 0.2)';
         badge.style.color = '#eab308';
+
         document.getElementById('tabUsers').style.display = 'block';
     } else {
         badge.style.background = 'rgba(205, 65, 43, 0.2)';
@@ -898,9 +899,11 @@ async function addClip() {
 // Admin klip listesi
 async function loadAdminClips() {
     const container = document.getElementById('adminClipsList');
+    const countEl = document.getElementById('adminClipCount');
     try {
         const res = await fetch(ADMIN_API + '/api/clips');
         const clips = await res.json();
+        if (countEl) countEl.textContent = clips.length + ' klip';
         if (clips.length === 0) {
             container.innerHTML = '<p style="text-align:center;color:var(--text-tertiary);padding:40px;font-family:Rajdhani,sans-serif;font-size:1.1rem;">Henüz klip eklenmemiş.</p>';
             return;
