@@ -615,3 +615,12 @@ document.addEventListener('mouseout', (e) => {
     }
 });
 
+// ========================
+// OTOMATİK YENİLEME - Her 2 dakikada bir
+// ========================
+setInterval(() => {
+    console.log('[Auto-Refresh] Yayıncı verileri güncelleniyor...');
+    // Cache'i temizle ki taze veri gelsin
+    try { localStorage.removeItem(CACHE_KEY); } catch(e) {}
+    fetchAndRenderMainStreamers();
+}, 2 * 60 * 1000); // 2 dakika
