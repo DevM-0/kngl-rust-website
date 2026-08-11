@@ -34,6 +34,10 @@
                     <span>Yayıncılar</span>
                     <div class="nav-link-glow"></div>
                 </a>
+                <a href="#klipler" class="nav-link" data-text="Klipler">
+                    <span>Klipler</span>
+                    <div class="nav-link-glow"></div>
+                </a>
                 <a href="#kurallar" class="nav-link" data-text="Kurallar">
                     <span>Kurallar</span>
                     <div class="nav-link-glow"></div>
@@ -146,6 +150,26 @@
                     <div style="width: 50px; height: 50px; border: 4px solid rgba(255, 255, 255, 0.1); border-top-color: var(--rust-orange); border-radius: 50%; animation: spin 1s linear infinite;"></div>
                     <p style="color: var(--text-secondary); font-family: var(--font-heading); font-size: 1.2rem; letter-spacing: 1px;">Yayıncı Verileri Yükleniyor...</p>
                 </div>
+            </div>
+        </div>
+        <div onclick="document.getElementById('kurallar').scrollIntoView({behavior:'smooth'});" style="cursor:pointer; text-align: center; margin-top: 40px; padding-bottom: 10px;">
+            <span style="font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #555; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 6px;">Aşağı Kaydır</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" style="animation: bounce 2s infinite;"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </div>
+    </section>
+
+    <!-- Clips Preview Section -->
+    <section class="section" id="klipler" style="position: relative;">
+        <div class="container">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <span class="section-tag">KLİPLER</span>
+                    <h2 class="section-title">Öne Çıkan Klipler</h2>
+                </div>
+                <a href="clips.html" style="color: var(--rust-orange); text-decoration: none; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 1px; padding: 10px 24px; border: 1px solid var(--rust-orange); border-radius: 8px; transition: all 0.3s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='var(--rust-orange)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--rust-orange)'">TÜMÜNÜ GÖR →</a>
+            </div>
+            <div id="clipsPreviewGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                <!-- Rendered by script.js -->
             </div>
         </div>
         <div onclick="document.getElementById('kurallar').scrollIntoView({behavior:'smooth'});" style="cursor:pointer; text-align: center; margin-top: 40px; padding-bottom: 10px;">
