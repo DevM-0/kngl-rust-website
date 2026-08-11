@@ -70,7 +70,7 @@
 
             <!-- Elapsed Time Counter -->
             <div style="margin: 30px auto; text-align: center;">
-                <p style="font-family: 'Inter', sans-serif; font-size: 0.75rem; color: #888; letter-spacing: 3px; text-transform: uppercase; margin: 0 0 12px;">BAŞLANGIÇ</p>
+                <p style="font-family: 'Inter', sans-serif; font-size: 0.75rem; color: #888; letter-spacing: 3px; text-transform: uppercase; margin: 0 0 12px;">GEÇEN SÜRE</p>
                 <div id="elapsed-timer" style="display: flex; gap: 6px; justify-content: center; align-items: baseline;">
                     <span id="timer-hours" style="font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: #e85d3a; line-height: 1; text-shadow: 0 0 25px rgba(232,93,58,0.4);">00</span>
                     <span style="font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; color: rgba(255,255,255,0.2); line-height: 1;">.</span>
@@ -165,7 +165,10 @@
                     <span class="section-tag">KLİPLER</span>
                     <h2 class="section-title">Öne Çıkan Klipler</h2>
                 </div>
-                <a href="clips.html" style="color: var(--rust-orange); text-decoration: none; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 1px; padding: 10px 24px; border: 1px solid var(--rust-orange); border-radius: 8px; transition: all 0.3s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='var(--rust-orange)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--rust-orange)'">TÜMÜNÜ GÖR →</a>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="openSubmitClipModal()" style="background: transparent; color: white; text-decoration: none; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 1px; padding: 10px 24px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; transition: all 0.3s; cursor: pointer; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='rgba(255,255,255,0.4)'" onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(255,255,255,0.2)'">KLİP EKLE +</button>
+                    <a href="clips.html" style="color: var(--rust-orange); text-decoration: none; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 1px; padding: 10px 24px; border: 1px solid var(--rust-orange); border-radius: 8px; transition: all 0.3s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='var(--rust-orange)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--rust-orange)'">TÜMÜNÜ GÖR →</a>
+                </div>
             </div>
             <div id="clipsPreviewGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
                 <!-- Rendered by script.js -->
@@ -250,6 +253,7 @@
             <!-- Tabs -->
             <div style="display:flex; gap:4px; margin-bottom:28px; border-bottom:1px solid rgba(255,255,255,0.08);">
                 <button onclick="switchAdminTab('clips')" id="tabClips" style="padding:12px 24px; background:none; border:none; border-bottom:2px solid var(--rust-orange); color:var(--text-primary); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; cursor:pointer; letter-spacing:1px; transition:all 0.3s;">KLİPLER</button>
+                <button onclick="switchAdminTab('pending')" id="tabPending" style="padding:12px 24px; background:none; border:none; border-bottom:2px solid transparent; color:var(--text-tertiary); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; cursor:pointer; letter-spacing:1px; transition:all 0.3s;">ONAY BEKLEYENLER</button>
                 <button onclick="switchAdminTab('users')" id="tabUsers" style="padding:12px 24px; background:none; border:none; border-bottom:2px solid transparent; color:var(--text-tertiary); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; cursor:pointer; letter-spacing:1px; transition:all 0.3s; display:none;">KULLANICILAR</button>
             </div>
 
@@ -283,6 +287,17 @@
                 <div id="adminClipsList"></div>
             </div>
 
+            <!-- Pending Tab -->
+            <div id="adminPendingTab" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <div>
+                        <h3 style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.1rem; color:var(--text-primary); display:inline-block; margin-right:12px;">Onay Bekleyen Ziyaretçi Klipleri</h3>
+                        <span id="adminPendingCount" style="font-family:'Rajdhani',sans-serif; font-weight:600; color:var(--text-tertiary); font-size:0.85rem;"></span>
+                    </div>
+                </div>
+                <div id="adminPendingList"></div>
+            </div>
+
             <!-- Users Tab -->
             <div id="adminUsersTab" style="display:none;">
                 <div style="background:rgba(20,20,22,0.4); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:24px; margin-bottom:24px;">
@@ -300,5 +315,28 @@
     </section>
 
     <script src="script.js?v=7"></script>
+    <!-- Ziyaretçi Klip Ekleme Modalı -->
+    <div id="submitClipModal" class="modal-overlay" style="display: none; z-index: 100000; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); justify-content: center; align-items: center;">
+        <div style="background: rgba(20,20,22,0.95); width: 90%; max-width: 450px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); padding: 30px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
+            <button onclick="closeSubmitClipModal()" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: white; font-size: 1.5rem; cursor: pointer; opacity: 0.7; transition: opacity 0.3s;">&times;</button>
+            <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; color: white; letter-spacing: 2px; margin-bottom: 20px; text-align: center;">KLİP <span style="color: var(--rust-orange);">ÖNER</span></h2>
+            
+            <p style="font-family: 'Inter', sans-serif; font-size: 0.9rem; color: #888; text-align: center; margin-bottom: 24px;">Eklediğin klip yönetici onayından geçtikten sonra sitede yayınlanacaktır.</p>
+            
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-family: 'Rajdhani', sans-serif; font-weight: 600; color: #ccc; margin-bottom: 8px;">KICK KLİP LİNKİ</label>
+                <input type="text" id="visitorClipUrl" placeholder="https://kick.com/.../clips/..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.3s;">
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-family: 'Rajdhani', sans-serif; font-weight: 600; color: #ccc; margin-bottom: 8px;">KLİP BAŞLIĞI</label>
+                <input type="text" id="visitorClipTitle" placeholder="Örn: Komik anlar..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.3s;">
+            </div>
+            
+            <div id="visitorClipError" style="display: none; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; padding: 10px; border-radius: 6px; margin-bottom: 16px; font-family: 'Inter', sans-serif; font-size: 0.85rem; text-align: center;"></div>
+            
+            <button id="visitorSubmitBtn" onclick="submitVisitorClip()" style="width: 100%; padding: 14px; background: var(--rust-orange); color: white; border: none; border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.1rem; letter-spacing: 1px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(232,93,58,0.3);">ONAYA GÖNDER</button>
+        </div>
+    </div>
 </body>
 </html>
