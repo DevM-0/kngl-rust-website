@@ -696,30 +696,29 @@ loadClipsPreview();
 // Klipleri de otomatik yenile
 setInterval(loadClipsPreview, 2 * 60 * 1000);
 // ========================
-// ADMIN PANEL (Full-Screen Overlay)
+// ADMIN PANEL (Login Modal + Normal Section)
 // ========================
 const ADMIN_API = 'https://knglrust.onrender.com';
 let adminToken = localStorage.getItem('kngl_admin_token');
 let adminUser = null;
 let pendingClipData = null;
 
-// URL hash #admin → overlay'i aç
-function openAdminOverlay() {
-    document.getElementById('adminOverlay').style.display = 'block';
-    document.body.style.overflow = 'hidden';
+// URL hash #admin → login modal aç (giriş yapılmamışsa)
+function openLoginModal() {
+    const modal = document.getElementById('adminLoginModal');
+    if (modal) { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
 }
-function closeAdminOverlay() {
-    document.getElementById('adminOverlay').style.display = 'none';
-    document.body.style.overflow = '';
-    window.location.hash = '';
+function closeLoginModal() {
+    const modal = document.getElementById('adminLoginModal');
+    if (modal) { modal.style.display = 'none'; document.body.style.overflow = ''; }
 }
 
-if (window.location.hash === '#admin') {
-    openAdminOverlay();
+if (window.location.hash === '#admin' && !adminToken) {
+    openLoginModal();
 }
 window.addEventListener('hashchange', () => {
-    if (window.location.hash === '#admin') {
-        openAdminOverlay();
+    if (window.location.hash === '#admin' && !adminToken) {
+        openLoginModal();
     }
 });
 
@@ -732,7 +731,6 @@ window.addEventListener('hashchange', () => {
         });
         if (res.ok) {
             adminUser = await res.json();
-            openAdminOverlay();
             showAdminDashboard();
         } else {
             localStorage.removeItem('kngl_admin_token');
@@ -781,15 +779,34 @@ function adminLogout() {
     adminToken = null;
     adminUser = null;
     localStorage.removeItem('kngl_admin_token');
-    document.getElementById('adminLoginScreen').style.display = 'flex';
-    document.getElementById('adminDashboard').style.display = 'none';
+    
+    document.getElementById('adminNavLink').style.display = 'none';
+    document.getElementById('adminNavInfo').style.display = 'none';
+    document.getElementById('adminpanel').style.display = 'none';
+    
     document.getElementById('adminUsername').value = '';
     document.getElementById('adminPassword').value = '';
+    
+    // Eğer admin panelindeyse anasayfaya dön
+    if (window.location.hash === '#adminpanel') {
+        window.location.hash = '';
+    }
 }
 
 function showAdminDashboard() {
-    document.getElementById('adminLoginScreen').style.display = 'none';
-    document.getElementById('adminDashboard').style.display = 'block';
+    closeLoginModal();
+    
+    // Navigasyon öğelerini göster
+    document.getElementById('adminNavLink').style.display = 'flex';
+    document.getElementById('adminNavInfo').style.display = 'flex';
+    
+    // Admin section'ı görünür yap
+    document.getElementById('adminpanel').style.display = 'block';
+    
+    // Eğer hash #admin ise giriş yaptıktan sonra #adminpanel'e kaydır
+    if (window.location.hash === '#admin') {
+        window.location.hash = '#adminpanel';
+    }
     
     // Kullanıcı bilgisi
     document.getElementById('adminUserInfo').textContent = adminUser.username;
