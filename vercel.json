@@ -1,32 +1,8 @@
 {
-  "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/streamers",
-      "dest": "/api/streamers.js",
-      "methods": ["POST", "OPTIONS"]
-    },
-    {
-      "src": "/style.css(.*)",
-      "dest": "/style.css"
-    },
-    {
-      "src": "/script.js(.*)",
-      "dest": "/script.js"
-    },
-    {
-      "src": "/logo.jpg",
-      "dest": "/logo.jpg"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/api/streamers",
+      "destination": "/api/streamers"
     }
   ]
 }
