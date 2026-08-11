@@ -724,6 +724,48 @@ window.addEventListener('hashchange', () => {
 });
 
 // Oturum kontrolü
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.style.padding = '14px 24px';
+    toast.style.borderRadius = '8px';
+    toast.style.fontFamily = "'Inter', sans-serif";
+    toast.style.fontSize = '0.95rem';
+    toast.style.fontWeight = '500';
+    toast.style.color = 'white';
+    toast.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+    toast.style.transition = 'all 0.3s';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-20px)';
+    
+    if (type === 'success') {
+        toast.style.background = 'linear-gradient(135deg, rgba(34,197,94,0.9), rgba(22,163,74,0.9))';
+        toast.style.border = '1px solid rgba(34,197,94,0.3)';
+    } else {
+        toast.style.background = 'linear-gradient(135deg, rgba(239,68,68,0.9), rgba(220,38,38,0.9))';
+        toast.style.border = '1px solid rgba(239,68,68,0.3)';
+    }
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateY(0)'; }, 10);
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(-20px)'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+function customConfirm(message, onConfirm) {
+    const modal = document.getElementById('confirmModal');
+    if (!modal) return;
+    document.getElementById('confirmMessage').textContent = message;
+    modal.style.display = 'flex';
+    
+    const yesBtn = document.getElementById('confirmYes');
+    const noBtn = document.getElementById('confirmNo');
+    
+    const cleanup = () => { modal.style.display = 'none'; yesBtn.onclick = null; noBtn.onclick = null; };
+    yesBtn.onclick = () => { cleanup(); onConfirm(); };
+    noBtn.onclick = () => { cleanup(); };
+}
+
 (async function checkAdminSession() {
     if (!adminToken) return;
     
