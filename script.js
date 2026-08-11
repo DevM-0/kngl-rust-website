@@ -695,3 +695,310 @@ loadClipsPreview();
 
 // Klipleri de otomatik yenile
 setInterval(loadClipsPreview, 2 * 60 * 1000);
+
+// ========================
+// ADMIN PANEL
+// ========================
+const ADMIN_API = 'https://knglrust.onrender.com';
+let adminToken = localStorage.getItem('kngl_admin_token');
+let adminUser = null;
+let pendingClipData = null;
+
+// Sayfa yüklendiğinde oturum kontrolü + URL hash kontrolü
+function showAdminSection() {
+    const adminSection = document.getElementById('admin');
+    const adminNavLink = document.getElementById('adminNavLink');
+    if (adminSection) adminSection.style.display = 'block';
+    if (adminNavLink) adminNavLink.style.display = 'flex';
+}
+
+// URL hash #admin ise admin bölümünü göster
+if (window.location.hash === '#admin') {
+    showAdminSection();
+}
+window.addEventListener('hashchange', () => {
+    if (window.location.hash === '#admin') {
+        showAdminSection();
+    }
+});
+
+(async function checkAdminSession() {
+    if (!adminToken) return;
+    try {
+        const res = await fetch(ADMIN_API + '/api/admin/me', {
+            headers: { 'Authorization': 'Bearer ' + adminToken }
+        });
+        if (res.ok) {
+            adminUser = await res.json();
+            showAdminDashboard();
+        } else {
+            localStorage.removeItem('kngl_admin_token');
+            adminToken = null;
+        }
+    } catch (e) {
+        console.error('Admin session check failed:', e);
+    }
+})();
+
+async function adminLogin() {
+    const username = document.getElementById('adminUsername').value.trim();
+    const password = document.getElementById('adminPassword').value;
+    const errorEl = document.getElementById('adminError');
+    errorEl.style.display = 'none';
+
+    if (!username || !password) {
+        errorEl.textContent = 'Kullanıcı adı ve şifre gerekli';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    try {
+        const res = await fetch(ADMIN_API + '/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            errorEl.textContent = data.error || 'Giriş başarısız';
+            errorEl.style.display = 'block';
+            return;
+        }
+        adminToken = data.token;
+        adminUser = data.user;
+        localStorage.setItem('kngl_admin_token', adminToken);
+        showAdminDashboard();
+    } catch (e) {
+        errorEl.textContent = 'Sunucuya bağlanılamadı';
+        errorEl.style.display = 'block';
+    }
+}
+
+function adminLogout() {
+    adminToken = null;
+    adminUser = null;
+    localStorage.removeItem('kngl_admin_token');
+    document.getElementById('adminLogin').style.display = 'block';
+    document.getElementById('adminDashboard').style.display = 'none';
+    document.getElementById('adminUsername').value = '';
+    document.getElementById('adminPassword').value = '';
+}
+
+function showAdminDashboard() {
+    // Admin bölümünü ve nav linkini göster
+    document.getElementById('admin').style.display = 'block';
+    document.getElementById('adminNavLink').style.display = 'flex';
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminDashboard').style.display = 'block';
+    
+    // Kullanıcı bilgisi
+    document.getElementById('adminUserInfo').textContent = adminUser.username;
+    const badge = document.getElementById('adminRoleBadge');
+    badge.textContent = adminUser.role.toUpperCase();
+    if (adminUser.role === 'owner') {
+        badge.style.background = 'rgba(234, 179, 8, 0.2)';
+        badge.style.color = '#eab308';
+        document.getElementById('tabUsers').style.display = 'block';
+    } else {
+        badge.style.background = 'rgba(205, 65, 43, 0.2)';
+        badge.style.color = '#e85d3a';
+        document.getElementById('tabUsers').style.display = 'none';
+    }
+
+    loadAdminClips();
+    if (adminUser.role === 'owner') loadAdminUsers();
+}
+
+function switchAdminTab(tab) {
+    const clipsTab = document.getElementById('adminClipsTab');
+    const usersTab = document.getElementById('adminUsersTab');
+    const tabClips = document.getElementById('tabClips');
+    const tabUsers = document.getElementById('tabUsers');
+
+    if (tab === 'clips') {
+        clipsTab.style.display = 'block';
+        usersTab.style.display = 'none';
+        tabClips.style.borderBottomColor = 'var(--rust-orange)';
+        tabClips.style.color = 'var(--text-primary)';
+        tabUsers.style.borderBottomColor = 'transparent';
+        tabUsers.style.color = 'var(--text-tertiary)';
+    } else {
+        clipsTab.style.display = 'none';
+        usersTab.style.display = 'block';
+        tabUsers.style.borderBottomColor = 'var(--rust-orange)';
+        tabUsers.style.color = 'var(--text-primary)';
+        tabClips.style.borderBottomColor = 'transparent';
+        tabClips.style.color = 'var(--text-tertiary)';
+    }
+}
+
+// Klip bilgilerini çek
+async function fetchClipInfo() {
+    const url = document.getElementById('clipUrlInput').value.trim();
+    if (!url) return alert('Klip linki girin');
+    const btn = document.getElementById('fetchClipBtn');
+    btn.textContent = 'Çekiliyor...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(ADMIN_API + '/api/clips/fetch-info', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
+            body: JSON.stringify({ clipUrl: url })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        pendingClipData = data;
+        document.getElementById('previewThumb').src = data.thumbnail;
+        document.getElementById('previewTitle').value = data.title || '';
+        document.getElementById('previewMeta').textContent = `${data.channelName} • ${formatClipDuration(data.duration || 0)} • ${data.views || 0} izlenme`;
+        document.getElementById('clipPreview').style.display = 'block';
+    } catch (e) {
+        alert('Hata: ' + e.message);
+    }
+    btn.textContent = 'Bilgileri Çek';
+    btn.disabled = false;
+}
+
+// Klip ekle
+async function addClip() {
+    if (!pendingClipData) return;
+    const title = document.getElementById('previewTitle').value.trim();
+
+    try {
+        const res = await fetch(ADMIN_API + '/api/clips', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
+            body: JSON.stringify({
+                clipId: pendingClipData.clipId,
+                clipUrl: pendingClipData.clipUrl,
+                title: title || pendingClipData.title,
+                thumbnail: pendingClipData.thumbnail,
+                duration: pendingClipData.duration,
+                views: pendingClipData.views,
+                channelName: pendingClipData.channelName,
+                channelAvatar: pendingClipData.channelAvatar,
+                category: pendingClipData.category
+            })
+        });
+        if (!res.ok) throw new Error('Klip eklenemedi');
+
+        pendingClipData = null;
+        document.getElementById('clipUrlInput').value = '';
+        document.getElementById('clipPreview').style.display = 'none';
+        loadAdminClips();
+        loadClipsPreview(); // Ana sayfadaki önizlemeyi de güncelle
+        alert('Klip başarıyla eklendi!');
+    } catch (e) {
+        alert('Hata: ' + e.message);
+    }
+}
+
+// Admin klip listesi
+async function loadAdminClips() {
+    const container = document.getElementById('adminClipsList');
+    try {
+        const res = await fetch(ADMIN_API + '/api/clips');
+        const clips = await res.json();
+        if (clips.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:var(--text-tertiary);padding:40px;font-family:Rajdhani,sans-serif;font-size:1.1rem;">Henüz klip eklenmemiş.</p>';
+            return;
+        }
+        container.innerHTML = clips.map(clip => `
+            <div style="display:flex;align-items:center;gap:16px;padding:14px;background:rgba(20,20,22,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:10px;flex-wrap:wrap;">
+                <img src="${clip.thumbnail}" style="width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:#111;">
+                <div style="flex:1;min-width:180px;">
+                    <input type="text" value="${clip.title || ''}" id="clipTitle_${clip.id}" style="width:100%;padding:6px 10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:var(--text-primary);font-family:'Rajdhani',sans-serif;font-weight:600;outline:none;font-size:0.95rem;">
+                    <p style="color:var(--text-tertiary);font-size:0.8rem;margin-top:4px;">${clip.channelName} • ${formatClipDuration(clip.duration || 0)} • ${clip.views || 0} izlenme</p>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button onclick="editClipTitle('${clip.id}')" style="padding:6px 14px;background:rgba(59,130,246,0.2);color:#3b82f6;border:1px solid rgba(59,130,246,0.3);border-radius:6px;font-family:'Rajdhani',sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Kaydet</button>
+                    <button onclick="deleteClip('${clip.id}')" style="padding:6px 14px;background:rgba(239,68,68,0.2);color:#ef4444;border:1px solid rgba(239,68,68,0.3);border-radius:6px;font-family:'Rajdhani',sans-serif;font-weight:600;cursor:pointer;font-size:0.85rem;">Sil</button>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        container.innerHTML = '<p style="color:#ef4444;text-align:center;">Klipler yüklenemedi</p>';
+    }
+}
+
+async function editClipTitle(id) {
+    const title = document.getElementById('clipTitle_' + id).value.trim();
+    try {
+        const res = await fetch(ADMIN_API + '/api/clips/' + id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
+            body: JSON.stringify({ title })
+        });
+        if (res.ok) {
+            alert('Başlık güncellendi!');
+            loadClipsPreview();
+        }
+    } catch (e) { alert('Hata: ' + e.message); }
+}
+
+async function deleteClip(id) {
+    if (!confirm('Bu klibi silmek istediğine emin misin?')) return;
+    try {
+        const res = await fetch(ADMIN_API + '/api/clips/' + id, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + adminToken }
+        });
+        if (res.ok) {
+            loadAdminClips();
+            loadClipsPreview();
+        }
+    } catch (e) { alert('Hata: ' + e.message); }
+}
+
+// Kullanıcı yönetimi
+async function loadAdminUsers() {
+    const container = document.getElementById('adminUsersList');
+    try {
+        const res = await fetch(ADMIN_API + '/api/admin/users', {
+            headers: { 'Authorization': 'Bearer ' + adminToken }
+        });
+        const users = await res.json();
+        container.innerHTML = users.map(u => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(20,20,22,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:8px;margin-bottom:8px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-family:'Rajdhani',sans-serif;font-weight:600;color:var(--text-primary);">${u.username}</span>
+                    <span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.7rem;padding:2px 8px;border-radius:4px;${u.role === 'owner' ? 'background:rgba(234,179,8,0.2);color:#eab308;' : 'background:rgba(205,65,43,0.2);color:#e85d3a;'}">${u.role.toUpperCase()}</span>
+                </div>
+                ${u.role !== 'owner' ? `<button onclick="deleteUser('${u.id}')" style="padding:4px 12px;background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);border-radius:4px;font-family:'Rajdhani',sans-serif;font-weight:600;cursor:pointer;font-size:0.8rem;">Sil</button>` : '<span style="color:#eab308;font-size:0.8rem;font-family:Rajdhani,sans-serif;">👑</span>'}
+            </div>
+        `).join('');
+    } catch (e) { container.innerHTML = ''; }
+}
+
+async function createAdmin() {
+    const username = document.getElementById('newAdminUsername').value.trim();
+    const password = document.getElementById('newAdminPassword').value;
+    if (!username || !password || password.length < 6) return alert('Kullanıcı adı ve şifre (min 6 karakter) gerekli');
+
+    try {
+        const res = await fetch(ADMIN_API + '/api/admin/create-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        document.getElementById('newAdminUsername').value = '';
+        document.getElementById('newAdminPassword').value = '';
+        loadAdminUsers();
+        alert('Admin oluşturuldu: ' + username);
+    } catch (e) { alert('Hata: ' + e.message); }
+}
+
+async function deleteUser(id) {
+    if (!confirm('Bu admini silmek istediğine emin misin?')) return;
+    try {
+        const res = await fetch(ADMIN_API + '/api/admin/users/' + id, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + adminToken }
+        });
+        if (res.ok) loadAdminUsers();
+    } catch (e) { alert('Hata: ' + e.message); }
+}
