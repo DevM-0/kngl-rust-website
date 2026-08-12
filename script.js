@@ -256,35 +256,44 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = 'team-card';
             card.dataset.teamId = team.id;
-            card.style.cssText = 'background: rgba(20,20,20,0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; overflow: hidden; cursor: pointer; transition: all 0.4s ease;';
+            card.style.cssText = `
+                background: linear-gradient(145deg, rgba(25,25,28,0.95) 0%, rgba(15,15,17,0.98) 100%);
+                border: 1px solid rgba(232,93,58,0.12);
+                border-radius: 18px;
+                overflow: hidden;
+                cursor: pointer;
+                transition: all 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                position: relative;
+            `;
             
             const membersList = team.members.map((member, i) => `
-                <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
-                    <span style="font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: rgba(255,255,255,0.15); width: 22px;">${String(i + 1).padStart(2, '0')}</span>
-                    <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, ${rustColor}44, ${rustColor}22); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: ${rustColor}; font-weight: 700; font-family: 'Inter', sans-serif;">${member.charAt(0)}</div>
-                    <span style="font-family: 'Inter', sans-serif; font-size: 0.9rem; color: #ccc; font-weight: 500; letter-spacing: 0.3px;">${member}</span>
+                <div style="display: flex; align-items: center; gap: 14px; padding: 11px 16px; border-radius: 10px; transition: background 0.2s ease; margin: 3px 0;" onmouseover="this.style.background='rgba(232,93,58,0.06)'" onmouseout="this.style.background='transparent'">
+                    <span style="font-family: 'Bebas Neue', sans-serif; font-size: 0.85rem; color: rgba(255,255,255,0.12); width: 20px; text-align: center;">${String(i + 1).padStart(2, '0')}</span>
+                    <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, ${rustColor}, ${rustColor}88); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #fff; font-weight: 700; font-family: 'Inter', sans-serif; box-shadow: 0 2px 12px ${rustColor}33; flex-shrink: 0;">${member.charAt(0)}</div>
+                    <span style="font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; color: rgba(255,255,255,0.85); font-weight: 600; letter-spacing: 0.5px;">${member}</span>
                 </div>
             `).join('');
 
             card.innerHTML = `
-                <div style="background: linear-gradient(135deg, ${rustColor}33 0%, ${rustColor}11 100%); padding: 24px; text-align: center; border-bottom: 1px solid ${rustColor}33; position: relative;">
-                    <div style="position: absolute; top: 14px; right: 16px; font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: ${rustColor}15; line-height: 1;">#${team.id}</div>
-                    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: ${rustColor}; margin: 0; letter-spacing: 3px; text-shadow: 0 0 20px ${rustColor}44;">${team.name}</h3>
-                    <div style="font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #666; margin-top: 4px; letter-spacing: 1px;">${team.members.length} OYUNCU</div>
+                <div style="position: relative; padding: 28px 24px 20px; text-align: center; overflow: hidden;">
+                    <div style="position: absolute; top: -10px; right: -5px; font-family: 'Bebas Neue', sans-serif; font-size: 5rem; color: rgba(232,93,58,0.06); line-height: 1; pointer-events: none; user-select: none;">#${team.id}</div>
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, ${rustColor}33, transparent);"></div>
+                    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem; color: ${rustColor}; margin: 0; letter-spacing: 4px; position: relative; z-index: 1; text-shadow: 0 0 30px ${rustColor}22;">${team.name}</h3>
+                    <div style="font-family: 'Rajdhani', sans-serif; font-size: 0.75rem; color: rgba(255,255,255,0.25); margin-top: 4px; letter-spacing: 2px; font-weight: 600;">${team.members.length} OYUNCU</div>
                 </div>
-                <div style="padding: 18px 24px;">
+                <div style="padding: 8px 12px 16px;">
                     ${membersList}
                 </div>
             `;
             
             card.addEventListener('mouseenter', () => {
-                card.style.transform = 'translateY(-6px) scale(1.02)';
-                card.style.borderColor = rustColor + '44';
-                card.style.boxShadow = '0 12px 40px ' + rustColor + '22';
+                card.style.transform = 'translateY(-8px) scale(1.02)';
+                card.style.borderColor = rustColor + '40';
+                card.style.boxShadow = `0 20px 50px rgba(0,0,0,0.4), 0 0 30px ${rustColor}15, inset 0 1px 0 ${rustColor}20`;
             });
             card.addEventListener('mouseleave', () => {
                 card.style.transform = 'translateY(0) scale(1)';
-                card.style.borderColor = 'rgba(255,255,255,0.06)';
+                card.style.borderColor = 'rgba(232,93,58,0.12)';
                 card.style.boxShadow = 'none';
             });
             
