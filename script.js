@@ -251,7 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const teamsGrid = document.getElementById('teamsGrid');
     if (teamsGrid) {
         teamsGrid.innerHTML = '';
-        teamsGrid.style.cssText = 'display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;';
         const rustColor = '#e85d3a';
         TEAMS.forEach(team => {
             const card = document.createElement('div');
