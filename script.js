@@ -59,7 +59,7 @@ const TEAMS = [
             { name: 'DİZCİ', slug: 'dizci' },
             { name: 'HÜSAM', slug: 'husamviyuviyu' },
             { name: 'ORDER', slug: 'order' },
-            { name: 'MALİK', slug: 'malik' }
+            { name: 'MALİK', slug: 'trinkles' }
         ]
     },
     {
