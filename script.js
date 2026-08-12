@@ -1043,7 +1043,7 @@ async function loadAdminClips() {
         container.innerHTML = displayClips.map(clip => `
             <div style="display:flex;flex-direction:column;gap:12px;padding:12px;background:rgba(20,20,22,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:10px;">
                 <div style="display:flex;gap:12px;">
-                    <img src="${clip.thumbnail}" style="width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:#111;">
+                    <a href="https://kick.com/${clip.channelName}?clip=${clip.id}" target="_blank"><img src="${clip.thumbnail}" style="width:120px;cursor:pointer;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:#111;"></a>
                     <div style="flex:1;min-width:140px;">
                         <input type="text" value="${clip.title || ''}" id="clipTitle_${clip.id}" style="width:100%;padding:6px 10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:var(--text-primary);font-family:'Rajdhani',sans-serif;font-weight:600;outline:none;font-size:0.95rem;">
                         <p style="color:var(--text-tertiary);font-size:0.8rem;margin-top:4px;">${clip.channelName} • ${formatClipDuration(clip.duration || 0)} • ${clip.views || 0} izlenme</p>
@@ -1309,4 +1309,33 @@ async function rejectPendingClip(id) {
         } catch (e) { showToast('Hata: ' + e.message, 'error'); }
     });
 }
+
+
+
+// Auto-refresh mechanism (Polling)
+let currentDbSha = null;
+async function checkForUpdates() {
+    try {
+        const db = await GithubDB.getFile();
+        if (currentDbSha && db.sha !== currentDbSha) {
+            currentDbSha = db.sha;
+            
+            // Eğer admin panelindeyse
+            if (document.getElementById('adminpanel') && document.getElementById('adminpanel').style.display !== 'none') {
+                if(typeof loadAdminClips === 'function') loadAdminClips();
+                if(typeof loadAdminPendingClips === 'function') loadAdminPendingClips();
+                if (adminUser && adminUser.role === 'owner' && typeof loadAdminUsers === 'function') loadAdminUsers();
+            }
+            // Eğer ana sayfadaysa (clips preview)
+            if (document.getElementById('clipsPreviewGrid') && typeof loadClipsPreview === 'function') {
+                loadClipsPreview(db.content.clips);
+            }
+        } else if (!currentDbSha) {
+            currentDbSha = db.sha;
+        }
+    } catch(e) {}
+}
+// Start polling every 10 seconds
+setInterval(checkForUpdates, 10000);
+setTimeout(checkForUpdates, 2000); // İlk kontrolü 2sn sonra yap
 
