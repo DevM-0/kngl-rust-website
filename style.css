@@ -12,6 +12,17 @@
     box-sizing: border-box;
 }
 
+/* Tarayıcı autofill beyaz arka plan düzeltmesi */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #141416 inset !important;
+    -webkit-text-fill-color: #e0e0e0 !important;
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: #e0e0e0;
+}
+
 :root {
     /* Rust Game Color Palette */
     --bg-primary: #0a0a0a;
