@@ -266,34 +266,35 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             
             const membersList = team.members.map((member, i) => `
-                <div style="display: flex; align-items: center; gap: 14px; padding: 11px 16px; border-radius: 10px; transition: background 0.2s ease; margin: 3px 0;" onmouseover="this.style.background='rgba(232,93,58,0.06)'" onmouseout="this.style.background='transparent'">
+                <div style="display: flex; align-items: center; gap: 14px; padding: 4px 16px; border-radius: 10px; transition: background 0.2s ease; margin: 1px 0;" onmouseover="this.style.background='rgba(232,93,58,0.06)'" onmouseout="this.style.background='transparent'">
                     <span style="font-family: 'Bebas Neue', sans-serif; font-size: 0.85rem; color: rgba(255,255,255,0.12); width: 20px; text-align: center;">${String(i + 1).padStart(2, '0')}</span>
-                    <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, ${rustColor}, ${rustColor}88); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #fff; font-weight: 700; font-family: 'Inter', sans-serif; box-shadow: 0 2px 12px ${rustColor}33; flex-shrink: 0;">${member.charAt(0)}</div>
+                    <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, ${rustColor}, ${rustColor}88); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #fff; font-weight: 700; font-family: 'Inter', sans-serif; box-shadow: 0 2px 12px ${rustColor}33; flex-shrink: 0;">${member.charAt(0)}</div>
                     <span style="font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; color: rgba(255,255,255,0.85); font-weight: 600; letter-spacing: 0.5px;">${member}</span>
                 </div>
             `).join('');
 
             card.innerHTML = `
-                <div style="position: relative; padding: 28px 24px 20px; text-align: center; overflow: hidden;">
-                    <div style="position: absolute; top: -10px; right: -5px; font-family: 'Bebas Neue', sans-serif; font-size: 5rem; color: rgba(232,93,58,0.06); line-height: 1; pointer-events: none; user-select: none;">#${team.id}</div>
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, ${rustColor}33, transparent);"></div>
+                <div style="position: relative; padding: 12px 24px 8px; text-align: center; overflow: hidden;">
+                    <div style="position: absolute; top: 0; right: 15px; font-family: 'Bebas Neue', sans-serif; font-size: 5rem; color: rgba(232,93,58,0.06); line-height: 1; pointer-events: none; user-select: none;">#${team.id}</div>
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, ${rustColor}88, transparent);"></div>
                     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem; color: ${rustColor}; margin: 0; letter-spacing: 4px; position: relative; z-index: 1; text-shadow: 0 0 30px ${rustColor}22;">${team.name}</h3>
-                    <div style="font-family: 'Rajdhani', sans-serif; font-size: 0.75rem; color: rgba(255,255,255,0.25); margin-top: 4px; letter-spacing: 2px; font-weight: 600;">${team.members.length} OYUNCU</div>
                 </div>
-                <div style="padding: 8px 12px 16px;">
+                <div style="padding: 6px 12px 10px; display: flex; flex-direction: column; gap: 2px;">
                     ${membersList}
                 </div>
             `;
             
             card.addEventListener('mouseenter', () => {
-                card.style.transform = 'translateY(-8px) scale(1.02)';
+                card.style.transform = 'translateY(-4px) scale(1.01)';
                 card.style.borderColor = rustColor + '40';
                 card.style.boxShadow = `0 20px 50px rgba(0,0,0,0.4), 0 0 30px ${rustColor}15, inset 0 1px 0 ${rustColor}20`;
+                card.style.zIndex = '10';
             });
             card.addEventListener('mouseleave', () => {
                 card.style.transform = 'translateY(0) scale(1)';
                 card.style.borderColor = 'rgba(232,93,58,0.12)';
                 card.style.boxShadow = 'none';
+                card.style.zIndex = '1';
             });
             
             card.addEventListener('click', () => openModal(team));
@@ -718,14 +719,14 @@ function renderClipCard(clip) {
             </div>
             <span style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.8);color:white;padding:3px 8px;border-radius:4px;font-size:0.8rem;font-weight:600;font-family:'Inter',sans-serif;">${formatClipDuration(clip.duration || 0)}</span>
         </div>
-        <div style="padding:14px;">
-            <h3 style="font-family:'Rajdhani',sans-serif;font-size:1.05rem;font-weight:700;color:var(--text-primary);margin-bottom:6px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${clip.title || 'Başlıksız Klip'}</h3>
-            <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;color:#666;font-size:0.8rem;">
+        <div style="padding:10px;">
+            <h3 style="font-family:'Rajdhani',sans-serif;font-size:1.05rem;font-weight:700;color:var(--text-primary);margin-bottom:4px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${clip.title || 'Başlıksız Klip'}</h3>
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;color:#666;font-size:0.8rem;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="#666"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                 ${clip.views || 0} izlenme
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
-                <img src="${avatar}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.1);" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${clip.channelName}'">
+                <img src="${avatar}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.1);" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${clip.channelName}'">
                 <span style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:0.9rem;color:#e85d3a;">${clip.channelName}</span>
                 ${teamBadge}
             </div>
@@ -746,7 +747,7 @@ async function loadClipsPreview() {
             return;
         }
         
-        // Max 8 klip göster (2 satır)
+        // Max 8 klip göster (Tam 2 satır, her satırda 4 klip)
         const preview = clips.slice(0, 8);
         grid.innerHTML = preview.map(renderClipCard).join('');
     } catch (err) {
