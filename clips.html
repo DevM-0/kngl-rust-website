@@ -164,9 +164,10 @@
         const team = getTeamForChannel(clip.channelName);
         const teamBadge = team ? `<span class="clip-team-badge">${team}</span>` : '';
         const avatar = clip.channelAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${clip.channelName}`;
+        const clipHref = clip.clipUrl || `https://kick.com/${clip.channelName}?clip=${clip.id || clip.clipId}`;
         
         return `
-        <a href="${clip.clipUrl}" target="_blank" rel="noopener" class="clip-card">
+        <a href="${clipHref}" target="_blank" rel="noopener" class="clip-card">
             <div class="clip-thumbnail">
                 <img src="${clip.thumbnail}" alt="${clip.title}" loading="lazy" onerror="this.src='https://api.dicebear.com/7.x/shapes/svg?seed=${clip.clipId}'">
                 <div class="play-overlay">
