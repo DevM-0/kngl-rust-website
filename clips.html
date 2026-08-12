@@ -227,6 +227,23 @@
         renderFilteredClips(e.target.value);
     });
 
+    let currentDbSha = null;
+    async function checkForUpdates() {
+        try {
+            const db = await GithubDB.getFile();
+            if (currentDbSha && db.sha !== currentDbSha) {
+                currentDbSha = db.sha;
+                allClips = db.content.clips;
+                renderFilteredClips(document.getElementById('clipSearch').value);
+            } else if (!currentDbSha) {
+                currentDbSha = db.sha;
+            }
+        } catch(e) {}
+    }
+    setInterval(checkForUpdates, 10000);
+    setTimeout(checkForUpdates, 2000);
+
+
     loadClips();
     </script>
 </body>
