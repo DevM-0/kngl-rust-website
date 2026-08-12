@@ -134,8 +134,7 @@ const TEAMS = [
             { name: 'ABDÜ', slug: 'simitciabdu' },
             { name: 'BARIŞ', slug: 'barisytb' },
             { name: 'BEKİR', slug: 'bekirgedik' },
-            { name: 'MAXERS', slug: 'maxers' },
-            { name: 'ARDA', slug: 'arda' }
+            { name: 'MAXERS', slug: 'maxers' }
         ]
     }
 ];
@@ -630,16 +629,19 @@ function startElapsedTimer() {
         if (diff < 0) return;
 
         const totalSeconds = Math.floor(diff / 1000);
-        const totalHours = Math.floor(totalSeconds / 3600);
+        const days = Math.floor(totalSeconds / (3600 * 24));
+        const totalHours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
 
         const pad = (n) => n.toString().padStart(2, '0');
 
+        const daysEl = document.getElementById('timer-days');
         const hoursEl = document.getElementById('timer-hours');
         const minutesEl = document.getElementById('timer-minutes');
         const secondsEl = document.getElementById('timer-seconds');
 
+        if (daysEl) daysEl.textContent = pad(days);
         if (hoursEl) hoursEl.textContent = pad(totalHours);
         if (minutesEl) minutesEl.textContent = pad(minutes);
         if (secondsEl) secondsEl.textContent = pad(seconds);
