@@ -118,6 +118,11 @@ body {
     padding: 0 24px;
 }
 
+#takimlar .container {
+    max-width: 1800px;
+    width: 95%;
+}
+
 /* ================================================
    NAVIGATION
    ================================================ */
@@ -629,7 +634,8 @@ body {
 .teams-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
+    column-gap: 12px;
+    row-gap: 24px;
 }
 
 .team-card {
@@ -838,8 +844,8 @@ body {
 
 .streamers-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
 }
 
 .streamer-card {
