@@ -100,7 +100,7 @@ const TEAMS = [
         streamers: [
             { name: 'SPYKS', slug: 'spyks26' },
             { name: 'FALCON', slug: 'falconn2k' },
-            { name: 'MUSTİ', slug: 'musti' },
+            { name: 'MUSTİ', slug: 'starlordistaken' },
             { name: 'BONE', slug: 'bonesaures' },
             { name: 'VAULT', slug: 'vaultcreative' }
         ]
