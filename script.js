@@ -697,9 +697,10 @@ function renderClipCard(clip) {
     const team = SLUG_TO_TEAM[slug] || '';
     const teamBadge = team ? `<span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.75rem;padding:2px 8px;border-radius:4px;background:rgba(205,65,43,0.2);color:var(--rust-orange);letter-spacing:1px;margin-left:auto;">${team}</span>` : '';
     const avatar = clip.channelAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${clip.channelName}`;
+    const clipHref = clip.clipUrl || `https://kick.com/${clip.channelName}?clip=${clip.id}`;
     
     return `
-    <a href="${clip.clipUrl}" target="_blank" rel="noopener" style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease;text-decoration:none;color:inherit;display:block;" onmouseover="this.style.transform='translateY(-6px) scale(1.02)';this.style.boxShadow='0 15px 40px rgba(0,0,0,0.5),0 0 25px rgba(205,65,43,0.15)';this.style.borderColor='rgba(205,65,43,0.4)'" onmouseout="this.style.transform='none';this.style.boxShadow='none';this.style.borderColor='rgba(255,255,255,0.06)'">
+    <a href="${clipHref}" target="_blank" rel="noopener" style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease;text-decoration:none;color:inherit;display:block;" onmouseover="this.style.transform='translateY(-6px) scale(1.02)';this.style.boxShadow='0 15px 40px rgba(0,0,0,0.5),0 0 25px rgba(205,65,43,0.15)';this.style.borderColor='rgba(205,65,43,0.4)'" onmouseout="this.style.transform='none';this.style.boxShadow='none';this.style.borderColor='rgba(255,255,255,0.06)'">
         <div style="position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#111;">
             <img src="${clip.thumbnail}" alt="${clip.title}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.src='https://api.dicebear.com/7.x/shapes/svg?seed=${clip.clipId}'">
             <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;height:50px;background:rgba(205,65,43,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0.8;">
