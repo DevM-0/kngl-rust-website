@@ -1,5 +1,17 @@
 {
-  "clips": [],
+  "clips": [
+    {
+      "id": "clip_01KZQ8N4YFQ6KP6D9W83MJVY88",
+      "title": "AHMETİN AM!  PATLIYOR",
+      "videoUrl": "https://clips.kick.com/clips/a7/clip_01KZQ8N4YFQ6KP6D9W83MJVY88/playlist.m3u8",
+      "thumbnail": "https://clips.kick.com/clips/a7/clip_01KZQ8N4YFQ6KP6D9W83MJVY88/thumbnail.webp",
+      "channelName": "AhmetTurku",
+      "channelAvatar": "https://files.kick.com/images/user/31204559/profile_image/conversion/b94defe4-27aa-436e-9541-fc211130349b-thumb.webp",
+      "duration": 30,
+      "views": 11,
+      "createdAt": "2026-08-11T01:58:18.176434Z"
+    }
+  ],
   "users": [
     {
       "id": "owner-1",
