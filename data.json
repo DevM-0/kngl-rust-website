@@ -1,6 +1,16 @@
 {
   "clips": [
     {
+      "id": "clip_01JZ3ZC0CTAEXSGMM8TQ239HKV",
+      "title": "sa",
+      "videoUrl": "https://clips.kick.com/clips/2f/clip_01JZ3ZC0CTAEXSGMM8TQ239HKV/playlist.m3u8",
+      "thumbnail": "https://clips.kick.com/clips/2f/clip_01JZ3ZC0CTAEXSGMM8TQ239HKV/thumbnail.webp",
+      "channelName": "Eray",
+      "duration": 30,
+      "views": 20840,
+      "createdAt": "2025-07-01T21:48:12.665721Z"
+    },
+    {
       "id": "clip_01KZEKH0P2SFNRZ4DBTBKR976A",
       "title": "deneme",
       "videoUrl": "https://clips.kick.com/clips/cf/clip_01KZEKH0P2SFNRZ4DBTBKR976A/playlist.m3u8",
