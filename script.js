@@ -108,10 +108,10 @@ const TEAMS = [
     },
     {
         id: 6, name: 'TAKIM 6', color: '#00e5ff',
-        members: ['MİELLA', 'OGİ', 'ÇAĞATAY', 'ERSİN', 'EBO'],
+        members: ['MİELLA', 'FLOMORE', 'ÇAĞATAY', 'ERSİN', 'EBO'],
         streamers: [
             { name: 'MİELLA', slug: 'm1ella' },
-            { name: 'OGİ', slug: 'ogi' },
+            { name: 'FLOMORE', slug: 'flomore' },
             { name: 'ÇAĞATAY', slug: 'cagatayakman' },
             { name: 'ERSİN', slug: 'ersin' },
             { name: 'EBO', slug: 'ebonivon' }
@@ -119,10 +119,10 @@ const TEAMS = [
     },
     {
         id: 7, name: 'TAKIM 7', color: '#f39c12',
-        members: ['SERCAN', 'EFE UYGAÇ', 'MURAT', 'ALP', 'MERT'],
+        members: ['SERCAN', 'EFE', 'MURAT', 'ALP', 'MERT'],
         streamers: [
             { name: 'SERCAN', slug: 'sercanzurna' },
-            { name: 'EFE UYGAÇ', slug: 'efeuygac' },
+            { name: 'EFE', slug: 'efeuygac' },
             { name: 'MURAT', slug: 'muratkzlcn' },
             { name: 'ALP', slug: 'alpnfinalform' },
             { name: 'MERT', slug: 'mert' }
@@ -130,13 +130,13 @@ const TEAMS = [
     },
     {
         id: 8, name: 'TAKIM 8', color: '#ff66b2',
-        members: ['FLOMORE', 'BARIS', 'BEKİR', 'MAXERS', 'SİMİTÇİ ABDÜ'],
+        members: ['ABDÜ', 'BARIŞ', 'BEKİR', 'MAXERS', 'ARDA'],
         streamers: [
-            { name: 'FLOMORE', slug: 'flomore' },
-            { name: 'BARIS', slug: 'barisytb' },
+            { name: 'ABDÜ', slug: 'simitciabdu' },
+            { name: 'BARIŞ', slug: 'barisytb' },
             { name: 'BEKİR', slug: 'bekirgedik' },
             { name: 'MAXERS', slug: 'maxers' },
-            { name: 'SİMİTÇİ ABDÜ', slug: 'simitciabdu' }
+            { name: 'ARDA', slug: 'arda' }
         ]
     }
 ];
