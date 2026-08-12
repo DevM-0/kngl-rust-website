@@ -983,6 +983,7 @@ async function fetchClipInfo() {
             videoUrl: clipData.video_url,
             thumbnail: clipData.thumbnail_url,
             channelName: clipData.channel.username,
+            channelAvatar: clipData.channel.profile_picture,
             duration: clipData.duration,
             views: clipData.views,
             createdAt: clipData.created_at
@@ -1213,6 +1214,7 @@ async function submitVisitorClip() {
             videoUrl: clipData.video_url,
             thumbnail: clipData.thumbnail_url,
             channelName: clipData.channel.username,
+            channelAvatar: clipData.channel.profile_picture,
             duration: clipData.duration,
             views: clipData.views,
             createdAt: clipData.created_at,
