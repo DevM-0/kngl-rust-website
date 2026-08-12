@@ -68,7 +68,6 @@ const TEAMS = [
         members: ['HOBBİT', 'ÖMER', 'KADİR', 'KF', 'YİĞİT'],
         streamers: [
             { name: 'HOBBİT', slug: 'hobbitemo' },
-            { name: 'ÖMER', slug: 'omer' },
             { name: 'KADİR', slug: 'kadirdemir' },
             { name: 'KF', slug: 'kfistaken' },
             { name: 'YİĞİT', slug: 'yyiido' }
@@ -113,7 +112,7 @@ const TEAMS = [
             { name: 'MİELLA', slug: 'm1ella' },
             { name: 'FLOMORE', slug: 'flomore' },
             { name: 'ÇAĞATAY', slug: 'cagatayakman' },
-            { name: 'ERSİN', slug: 'ersin' },
+            { name: 'ERSİN', slug: 'shownzy' },
             { name: 'EBO', slug: 'ebonivon' }
         ]
     },
@@ -125,7 +124,7 @@ const TEAMS = [
             { name: 'EFE', slug: 'efeuygac' },
             { name: 'MURAT', slug: 'muratkzlcn' },
             { name: 'ALP', slug: 'alpnfinalform' },
-            { name: 'MERT', slug: 'mert' }
+            { name: 'MERT', slug: 'merd' }
         ]
     },
     {
