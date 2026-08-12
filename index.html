@@ -114,9 +114,9 @@
     </section>
 
     <!-- Teams Section -->
-    <section class="section" id="takimlar" style="position: relative;">
+    <section class="section" id="takimlar" style="position: relative; padding-top: 80px; padding-bottom: 10px; min-height: 100vh;">
         <div class="container">
-            <div class="section-header">
+            <div class="section-header" style="margin-bottom: 20px;">
                 <span class="section-tag">TAKIMLAR</span>
                 <h2 class="section-title">Takımlar</h2>
             </div>
@@ -125,7 +125,7 @@
                 <!-- Cards rendered by script.js -->
             </div>
         </div>
-        <div onclick="document.getElementById('yayincilar').scrollIntoView({behavior:'smooth'});" style="cursor:pointer; text-align: center; margin-top: 40px; padding-bottom: 10px;">
+        <div onclick="document.getElementById('yayincilar').scrollIntoView({behavior:'smooth'});" style="cursor:pointer; text-align: center; margin-top: 10px; padding-bottom: 5px;">
             <span style="font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #555; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 6px;">Aşağı Kaydır</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" style="animation: bounce 2s infinite;"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
         </div>
@@ -156,34 +156,33 @@
         <div onclick="document.getElementById('kurallar').scrollIntoView({behavior:'smooth'});" style="cursor:pointer; text-align: center; margin-top: 40px; padding-bottom: 10px;">
             <span style="font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #555; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 6px;">Aşağı Kaydır</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" style="animation: bounce 2s infinite;"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-        </div>
     </section>
 
     <!-- Clips Preview Section -->
-    <section class="section" id="klipler" style="position: relative;">
+    <section class="section" id="klipler" style="position: relative; padding-top: 100px; padding-bottom: 10px; min-height: 100vh;">
         <div class="container">
-            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
                 <div>
                     <span class="section-tag">KLİPLER</span>
                     <h2 class="section-title">Öne Çıkan Klipler</h2>
                 </div>
                 <div style="display: flex; gap: 12px;">
                     <button onclick="openSubmitClipModal()" style="background: transparent; color: white; text-decoration: none; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 1px; padding: 10px 24px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; transition: all 0.3s; cursor: pointer; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.borderColor='rgba(255,255,255,0.4)'" onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(255,255,255,0.2)'">KLİP EKLE +</button>
-                    <a href="clips.html" style="color: var(--rust-orange); text-decoration: none; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 1px; padding: 10px 24px; border: 1px solid var(--rust-orange); border-radius: 8px; transition: all 0.3s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='var(--rust-orange)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--rust-orange)'">TÜMÜNÜ GÖR →</a>
+                    <a href="clips.html" style="color: var(--rust-orange); text-decoration: none; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 1px; padding: 10px 24px; border: 1px solid var(--rust-orange); border-radius: 8px; transition: all 0.3s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='var(--rust-orange)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--rust-orange)'">TÜMÜNÜ GÖR </a>
                 </div>
             </div>
-            <div id="clipsPreviewGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+            <div id="clipsPreviewGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">
                 <!-- Rendered by script.js -->
             </div>
         </div>
-        <div onclick="document.getElementById('kurallar').scrollIntoView({behavior:'smooth'});" style="cursor:pointer; text-align: center; margin-top: 40px; padding-bottom: 10px;">
+        <div onclick="document.getElementById('kurallar').scrollIntoView({behavior:'smooth'});" style="cursor:pointer; text-align: center; margin-top: 60px; padding-bottom: 5px;">
             <span style="font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #555; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 6px;">Aşağı Kaydır</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" style="animation: bounce 2s infinite;"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
         </div>
     </section>
 
     <!-- Rules Section -->
-    <section class="section section-alt" id="kurallar">
+    <section class="section section-alt" id="kurallar" style="padding-top: 100px; min-height: 100vh;">
         <div class="container">
             <div class="section-header">
                 <span class="section-tag">KURALLAR</span>
@@ -245,7 +244,7 @@
     </div>
 
     <!-- Admin Panel Section (normal section - aynı tasarım) -->
-    <section class="section" id="adminpanel" style="display:none;">
+    <section class="section" id="adminpanel" style="display:none; padding-top: 100px; min-height: 100vh;">
         <div class="container">
             <div class="section-header">
                 <span class="section-tag">YÖNETİM</span>
