@@ -98,6 +98,18 @@
   ],
   "pending_clips": [
     {
+      "id": "clip_01KZVTTYM5DTEPMFHZZN40ZK7V",
+      "title": "Ahmet kafasına gülle yiyor",
+      "videoUrl": "https://clips.kick.com/clips/48/clip_01KZVTTYM5DTEPMFHZZN40ZK7V/playlist.m3u8",
+      "thumbnail": "https://clips.kick.com/clips/48/clip_01KZVTTYM5DTEPMFHZZN40ZK7V/thumbnail.webp",
+      "channelName": "AhmetTurku",
+      "channelAvatar": "https://files.kick.com/images/user/31204559/profile_image/conversion/b94defe4-27aa-436e-9541-fc211130349b-thumb.webp",
+      "duration": 23,
+      "views": 0,
+      "createdAt": "2026-08-12T20:34:03.517349Z",
+      "ip": "85.101.10.181"
+    },
+    {
       "id": "clip_01KZVTJSMPCBBF5ECM9D0H147G",
       "title": "onlarla dogfight yapıcam",
       "videoUrl": "https://clips.kick.com/clips/5f/clip_01KZVTJSMPCBBF5ECM9D0H147G/playlist.m3u8",
