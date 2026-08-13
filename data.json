@@ -132,5 +132,18 @@
       "createdAt": "2026-08-11T23:25:39.831Z"
     }
   ],
-  "pending_clips": []
+  "pending_clips": [
+    {
+      "id": "clip_01KZXCWNBM49ZPCCFVK6VSE6GN",
+      "title": "bone sövüyor",
+      "videoUrl": "https://clips.kick.com/clips/73/clip_01KZXCWNBM49ZPCCFVK6VSE6GN/playlist.m3u8",
+      "thumbnail": "https://clips.kick.com/clips/73/clip_01KZXCWNBM49ZPCCFVK6VSE6GN/thumbnail.webp",
+      "channelName": "Flomore",
+      "channelAvatar": "https://files.kick.com/images/user/6224028/profile_image/conversion/57c4877f-98fa-40de-a49e-6e8035d9d45d-thumb.webp",
+      "duration": 36,
+      "views": 0,
+      "createdAt": "2026-08-13T11:08:27.722343Z",
+      "ip": "159.146.34.248"
+    }
+  ]
 }
