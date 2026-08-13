@@ -619,6 +619,10 @@ async function fetchAndRenderMainStreamers() {
 // ========================
 // ELAPSED TIMER
 // ========================
+// TIMER LOGIC
+// ========================
+/*
+// Eski Geçen Süre Sayacı (Şimdilik gizli/iptal edildi)
 function startElapsedTimer() {
     // Event started: 10 August 2026, 22:10 (Turkey time UTC+3)
     const eventStart = new Date('2026-08-10T22:10:00+03:00');
@@ -651,9 +655,51 @@ function startElapsedTimer() {
     updateTimer();
     setInterval(updateTimer, 1000);
 }
+*/
+
+function startCountdownTimer() {
+    // Target date: 14 August 2026, 23:00 (Turkey time UTC+3)
+    const targetDate = new Date('2026-08-14T23:00:00+03:00');
+
+    function updateCountdown() {
+        const now = new Date();
+        const diff = targetDate - now;
+
+        if (diff <= 0) {
+            // Süre dolduğunda 00:00:00:00 göstersin
+            document.getElementById('countdown-days').textContent = '00';
+            document.getElementById('countdown-hours').textContent = '00';
+            document.getElementById('countdown-minutes').textContent = '00';
+            document.getElementById('countdown-seconds').textContent = '00';
+            return;
+        }
+
+        const totalSeconds = Math.floor(diff / 1000);
+        const days = Math.floor(totalSeconds / (3600 * 24));
+        const totalHours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        const pad = (n) => n.toString().padStart(2, '0');
+
+        const daysEl = document.getElementById('countdown-days');
+        const hoursEl = document.getElementById('countdown-hours');
+        const minutesEl = document.getElementById('countdown-minutes');
+        const secondsEl = document.getElementById('countdown-seconds');
+
+        if (daysEl) daysEl.textContent = pad(days);
+        if (hoursEl) hoursEl.textContent = pad(totalHours);
+        if (minutesEl) minutesEl.textContent = pad(minutes);
+        if (secondsEl) secondsEl.textContent = pad(seconds);
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+}
 
 // Start timer when page loads
-startElapsedTimer();
+// startElapsedTimer();
+startCountdownTimer();
 
 // ========================
 // CARD HOVER ANIMATIONS
