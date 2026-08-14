@@ -1830,3 +1830,42 @@ body {
     padding: 4px 12px;
     border-radius: 6px;
 }
+
+/* Notification System */
+#site-notification {
+    position: fixed;
+    top: 100px;
+    right: -400px; /* Hidden initially */
+    min-width: 200px;
+    max-width: 280px;
+    background: linear-gradient(135deg, var(--rust-orange) 0%, var(--rust-red) 100%);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(232, 93, 58, 0.4);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#site-notification.show {
+    right: 24px;
+}
+#site-notification .notif-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    color: white;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+#site-notification .notif-body {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
+}
+
