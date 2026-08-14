@@ -167,5 +167,11 @@
       "createdAt": "2026-08-11T23:25:39.831Z"
     }
   ],
-  "pending_clips": []
+  "pending_clips": [],
+  "notification": {
+    "id": 1786722588981,
+    "message": "TEST",
+    "duration": 5,
+    "timestamp": 1786722588981
+  }
 }
