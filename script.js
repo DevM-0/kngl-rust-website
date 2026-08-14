@@ -998,7 +998,7 @@ function showAdminDashboard() {
 }
 
 function switchAdminTab(tab) {
-    const tabs = ['clips', 'pending', 'users'];
+    const tabs = ['clips', 'pending', 'users', 'notification'];
     tabs.forEach(t => {
         const tabEl = document.getElementById('admin' + t.charAt(0).toUpperCase() + t.slice(1) + 'Tab');
         const btnEl = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
@@ -1055,6 +1055,37 @@ async function fetchClipInfo() {
     } finally {
         btn.disabled = false;
         btn.textContent = 'Bilgileri Çek';
+    }
+}
+async function sendAdminNotification() {
+    const msg = document.getElementById('adminNotifMessage').value.trim();
+    const durationStr = document.getElementById('adminNotifDuration').value;
+    const duration = parseInt(durationStr, 10);
+
+    if (!msg) {
+        showToast('Lütfen bir bildirim mesajı girin.', 'error');
+        return;
+    }
+    if (isNaN(duration) || duration < 3 || duration > 60) {
+        showToast('Süre 3 ile 60 saniye arasında olmalıdır.', 'error');
+        return;
+    }
+
+    try {
+        const db = await GithubDB.getFile();
+        
+        db.content.notification = {
+            id: Date.now(),
+            message: msg,
+            duration: duration,
+            timestamp: Date.now()
+        };
+
+        await GithubDB.saveFile(db.content, db.sha);
+        showToast('Bildirim başarıyla yayına alındı!', 'success');
+        document.getElementById('adminNotifMessage').value = '';
+    } catch (e) {
+        showToast('Hata: ' + e.message, 'error');
     }
 }
 
@@ -1374,9 +1405,39 @@ async function rejectPendingClip(id) {
 
 // Auto-refresh mechanism (Polling)
 let currentDbSha = null;
+let lastNotifId = null;
+let notifTimeout = null;
+
+function showSiteNotification(msg, duration) {
+    const notifEl = document.getElementById('site-notification');
+    const msgEl = document.getElementById('site-notification-message');
+    if (!notifEl || !msgEl) return;
+
+    msgEl.textContent = msg;
+    notifEl.classList.add('show');
+
+    if (notifTimeout) clearTimeout(notifTimeout);
+
+    notifTimeout = setTimeout(() => {
+        notifEl.classList.remove('show');
+    }, duration * 1000);
+}
+
 async function checkForUpdates() {
     try {
         const db = await GithubDB.getFile();
+        
+        // Bildirim kontrolü
+        if (db.content.notification) {
+            const notif = db.content.notification;
+            // Bildirimin süresi geçmiş mi kontrolü (opsiyonel, 1 dakika sınırı koyalım ki eski bildirimler çok geç gelenlere çıkmasın)
+            const isExpired = (Date.now() - notif.timestamp) > (notif.duration * 1000 + 60000); 
+            if (!isExpired && notif.id !== lastNotifId) {
+                lastNotifId = notif.id;
+                showSiteNotification(notif.message, notif.duration);
+            }
+        }
+
         if (currentDbSha && db.sha !== currentDbSha) {
             currentDbSha = db.sha;
             
