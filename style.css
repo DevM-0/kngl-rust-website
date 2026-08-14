@@ -1834,7 +1834,7 @@ body {
 /* Notification System */
 #site-notification {
     position: fixed;
-    top: 100px;
+    top: 80px;
     right: -400px; /* Hidden initially */
     min-width: 280px;
     max-width: 380px;
