@@ -174,18 +174,5 @@
     "duration": 3,
     "timestamp": 1786802926947
   },
-  "activity": {
-    "KF": 1,
-    "MAXERS": 2,
-    "ALİ": 1,
-    "ALP": 3,
-    "FLOMORE": 0,
-    "AHMET": 2,
-    "DİZCİ": 1,
-    "MUSTİ": 1,
-    "VAULT": 1,
-    "ORDER": 1,
-    "EKREM": 1,
-    "AYBERK": 1
-  }
+  "activity": {}
 }
