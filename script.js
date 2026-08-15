@@ -26,6 +26,34 @@ const GithubDB = {
         const contentStr = decodeURIComponent(escape(window.atob(data.content)));
         return { content: JSON.parse(contentStr), sha: data.sha };
     },
+    async saveBackupFile(base64Content) {
+        try {
+            let backupSha = undefined;
+            const getRes = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/data_backup.json?t=${Date.now()}`, {
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' },
+                cache: 'no-store'
+            });
+            if (getRes.ok) {
+                const data = await getRes.json();
+                backupSha = data.sha;
+            }
+            await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/data_backup.json`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: 'Backup data.json via Admin Panel',
+                    content: base64Content,
+                    sha: backupSha
+                })
+            });
+        } catch (e) {
+            console.error("Yedekleme hatası:", e);
+        }
+    },
     async saveFile(contentObj, sha) {
         const contentStr = JSON.stringify(contentObj, null, 2);
         const base64Content = window.btoa(unescape(encodeURIComponent(contentStr)));
@@ -47,6 +75,9 @@ const GithubDB = {
             const err = await res.json();
             throw new Error(err.message || 'Güncelleme başarısız');
         }
+        
+        // Trigger backup asynchronously
+        this.saveBackupFile(base64Content);
         return await res.json();
     }
 };
@@ -993,6 +1024,9 @@ function showAdminDashboard() {
 
     loadAdminPendingClips();
     loadAdminClips();
+    
+    // Default to the Activity (Aktiflik) tab when opening Admin dashboard
+    switchAdminTab('activity');
     if (adminUser.role === 'owner') loadAdminUsers();
 }
 
@@ -1013,6 +1047,16 @@ function switchAdminTab(tab) {
             }
         }
     });
+    // Load data for the selected tab
+    if (tab === 'activity') {
+        GithubDB.getFile().then(db => loadAdminActivity(db.content)).catch(e => console.error(e));
+    } else if (tab === 'clips') {
+        loadAdminClips();
+    } else if (tab === 'pending') {
+        loadAdminPendingClips();
+    } else if (tab === 'users') {
+        loadAdminUsers();
+    }
 }
 
 // Klipler Yönetimi
@@ -1443,12 +1487,11 @@ async function checkForUpdates() {
             // Eğer admin panelindeyse
             if (document.getElementById('adminpanel') && document.getElementById('adminpanel').style.display !== 'none') {
                 if(typeof loadAdminClips === 'function') loadAdminClips();
+                if(typeof loadAdminPendingClips === 'function') loadAdminPendingClips();
+                if (adminUser && adminUser.role === 'owner' && typeof loadAdminUsers === 'function') loadAdminUsers();
                 if(typeof loadAdminActivity === 'function') loadAdminActivity(db.content);
             }
             if(typeof renderActivityFrontend === 'function') renderActivityFrontend(db.content);
-                if(typeof loadAdminPendingClips === 'function') loadAdminPendingClips();
-                if (adminUser && adminUser.role === 'owner' && typeof loadAdminUsers === 'function') loadAdminUsers();
-            }
             // Eğer ana sayfadaysa (clips preview)
             if (document.getElementById('clipsPreviewGrid') && typeof loadClipsPreview === 'function') {
                 loadClipsPreview(db.content.clips);
@@ -1494,57 +1537,81 @@ function toggleActivityView() {
     }
 }
 
-function loadAdminActivity(dbContent) {
+function loadAdminActivity() {
     const list = document.getElementById('adminActivityList');
     if (!list) return;
     
-    // Sort all players alphabetically
-    let allPlayers = [];
-    TEAMS.forEach(t => {
-        t.members.forEach(m => {
-            allPlayers.push(m);
-        });
-    });
-    allPlayers.sort();
+    list.style.display = 'grid';
+    list.style.gridTemplateColumns = 'repeat(4, 1fr)';
+    list.style.gap = '16px';
     
-    const activityData = dbContent.activity || {};
-    
-    list.innerHTML = allPlayers.map(player => {
-        const ticks = activityData[player] || 0;
-        const isTicked = currentActivitySession.has(player);
+    list.innerHTML = TEAMS.map(team => {
+        let sortedMembers = [...team.members].sort((a, b) => a.localeCompare(b));
+        
         return `
-            <li class="activity-player-item">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <span style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.1rem; color:var(--text-primary);">${player}</span>
-                    <span class="tick-badge">${ticks}</span>
+            <div class="admin-team-section" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:12px;">
+                <h4 style="font-family:'Bebas Neue',sans-serif; font-size:1.4rem; color:var(--rust-orange); margin-bottom:8px; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:4px; text-align:center;">${team.name}</h4>
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    ${sortedMembers.map(player => {
+                        const isTicked = currentActivitySession.has(player);
+                        const ticks = isTicked ? 1 : 0;
+                        return `
+                            <div class="activity-player-item" style="margin-bottom: 0;">
+                                <div style="display:flex; align-items:center;">
+                                    <span style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.1rem; color:var(--text-primary); width:75px; display:inline-block;">${player}</span>
+                                    <span class="tick-badge">${ticks}</span>
+                                </div>
+                                <div style="display:flex; gap:8px;">
+                                    ${isTicked ? 
+                                        `<button onclick="addActivityTick('${player}', -1)" class="admin-tick-btn" style="background:rgba(231,76,60,0.2); border-color:#e74c3c; color:#e74c3c;">-1 Geri Al</button>
+                                         <button class="admin-tick-btn ticked" disabled>✓</button>` : 
+                                        `<button onclick="addActivityTick('${player}', 1)" class="admin-tick-btn">+1 Yoklama Al</button>`
+                                    }
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
-                <div style="display:flex; gap:8px;">
-                    ${isTicked ? 
-                        `<button onclick="addActivityTick('${player}', -1)" class="admin-tick-btn" style="background:rgba(231,76,60,0.2); border-color:#e74c3c; color:#e74c3c;">-1 Geri Al</button>
-                         <button class="admin-tick-btn ticked" disabled>EKLEND� ?</button>` : 
-                        `<button onclick="addActivityTick('${player}', 1)" class="admin-tick-btn">+1 Yoklama Al</button>`
-                    }
-                </div>
-            </li>
+            </div>
         `;
     }).join('');
 }
 
-async function addActivityTick(player, increment) {
+function addActivityTick(player, increment) {
+    if (increment > 0) {
+        currentActivitySession.add(player);
+    } else {
+        currentActivitySession.delete(player);
+    }
+    // Re-render UI instantly
+    loadAdminActivity();
+    
+    // Clear search and focus for next entry
+    const searchInput = document.getElementById('adminSearchInput');
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+    }
+}
+
+async function saveActivityCheck() {
+    if (currentActivitySession.size === 0) {
+        showToast('Hiçbir seçim yapmadınız!', 'error');
+        return;
+    }
     try {
         const db = await GithubDB.getFile();
         if (!db.content.activity) db.content.activity = {};
         
-        let current = db.content.activity[player] || 0;
-        db.content.activity[player] = Math.max(0, current + increment);
-        
-        if (increment > 0) {
-            currentActivitySession.add(player);
-        } else {
-            currentActivitySession.delete(player);
-        }
+        currentActivitySession.forEach(player => {
+            let current = db.content.activity[player] || 0;
+            db.content.activity[player] = current + 1;
+        });
         
         await GithubDB.saveFile(db.content, db.sha);
+        currentActivitySession.clear();
+        
+        showToast('Seçimler kaydedildi ve puanlar eklendi!', 'success');
         loadAdminActivity(db.content);
         renderActivityFrontend(db.content);
     } catch(e) {
@@ -1552,10 +1619,21 @@ async function addActivityTick(player, increment) {
     }
 }
 
-function resetActivityCheck() {
-    currentActivitySession.clear();
-    GithubDB.getFile().then(db => loadAdminActivity(db.content));
-    showToast('Yoklama listesi s�f�rland�. Yeni tura ba�layabilirsiniz.', 'success');
+function resetActivityTable() {
+    customConfirm('DİKKAT: Bu işlem geri alınamaz! Aktiflik tablosundaki TÜM puanlar sıfırlanacaktır. Emin misin?', async () => {
+        try {
+            const db = await GithubDB.getFile();
+            db.content.activity = {};
+            await GithubDB.saveFile(db.content, db.sha);
+            currentActivitySession.clear();
+            
+            showToast('Aktiflik tablosu tamamen sıfırlandı.', 'success');
+            loadAdminActivity(db.content);
+            renderActivityFrontend(db.content);
+        } catch(e) {
+            showToast('Hata: ' + e.message, 'error');
+        }
+    });
 }
 
 function renderActivityFrontend(dbContent) {
@@ -1564,40 +1642,104 @@ function renderActivityFrontend(dbContent) {
     if (!teamsGrid || !globalList) return;
     
     const activityData = dbContent.activity || {};
+    const rustColor = '#e85d3a';
     
-    // Render Teams (only first 4 teams as requested)
+    // Render Teams (only first 4 teams)
     const activeTeams = TEAMS.slice(0, 4);
     teamsGrid.innerHTML = activeTeams.map(team => {
-        // Sort members by tick count descending
-        let sortedMembers = [...team.members].sort((a, b) => (activityData[b]||0) - (activityData[a]||0));
+        let sortedMembers = [...team.members].sort((a, b) => {
+            const ticksA = activityData[a] || 0;
+            const ticksB = activityData[b] || 0;
+            if (ticksB !== ticksA) return ticksB - ticksA;
+            return a.localeCompare(b);
+        });
         
         return `
-        <div class="team-card">
-            <h3 class="team-name" style="margin-bottom:16px;">${team.name}</h3>
-            <ul class="team-members-list">
-                ${sortedMembers.map(m => `
-                    <li style="display:flex; justify-content:space-between;">
-                        <span>${m}</span>
-                        <span style="color:var(--rust-orange); font-weight:700;">${activityData[m]||0}</span>
-                    </li>
+        <div style="background: linear-gradient(145deg, rgba(25,25,28,0.95) 0%, rgba(15,15,17,0.98) 100%); border: 1px solid rgba(232,93,58,0.12); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; height: 100%;">
+            <div style="position: relative; padding: 14px 24px 10px; text-align: center; overflow: hidden; flex-shrink: 0;">
+                <div style="position: absolute; top: 0; right: 15px; font-family: 'Bebas Neue', sans-serif; font-size: 5rem; color: rgba(232,93,58,0.06); line-height: 1; pointer-events: none;">#${team.id}</div>
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, ${rustColor}88, transparent);"></div>
+                <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: ${rustColor}; margin: 0; letter-spacing: 4px;">${team.name}</h3>
+            </div>
+            <div style="padding: 12px 14px 24px; display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;">
+                ${sortedMembers.map((m, i) => `
+                    <div class="${i === 0 ? 'first-place-glow' : ''}" style="display: flex; align-items: center; justify-content: space-between; padding: 7px 14px; border-radius: 10px; transition: background 0.2s ease;" onmouseover="this.style.background='${i === 0 ? 'rgba(255,215,0,0.1)' : 'rgba(232,93,58,0.06)'}'" onmouseout="this.style.background='${i === 0 ? 'rgba(255,215,0,0.05)' : 'transparent'}'">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span class="rank-number" style="font-family: 'Bebas Neue', sans-serif; font-size: 0.85rem; color: rgba(255,255,255,0.12); width: 20px; text-align: center;">${String(i + 1).padStart(2, '0')}</span>
+                            <div class="avatar-circle" style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, ${rustColor}, ${rustColor}88); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #fff; font-weight: 700; font-family: 'Inter', sans-serif; flex-shrink: 0;">${m.charAt(0)}</div>
+                            <span class="player-name" style="font-family: 'Rajdhani', sans-serif; font-size: 1rem; color: rgba(255,255,255,0.85); font-weight: 600;">${m}</span>
+                        </div>
+                        <span class="score-text" style="color:${rustColor}; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.1rem;">${activityData[m]||0}</span>
+                    </div>
                 `).join('')}
-            </ul>
+            </div>
         </div>
         `;
     }).join('');
     
-    // Render Global Leaderboard
+    // Render Global Leaderboard - 2 cards of 10 each
     let allPlayers = [];
-    TEAMS.forEach(t => t.members.forEach(m => allPlayers.push({name: m, ticks: activityData[m]||0})));
-    allPlayers.sort((a, b) => b.ticks - a.ticks); // Descending by ticks
+    TEAMS.slice(0, 4).forEach(t => t.members.forEach(m => allPlayers.push({name: m, ticks: activityData[m]||0})));
+    allPlayers.sort((a, b) => {
+        if (b.ticks !== a.ticks) return b.ticks - a.ticks;
+        return a.name.localeCompare(b.name);
+    });
+    allPlayers = allPlayers.slice(0, 20); // Max 20 players
     
-    globalList.innerHTML = allPlayers.map((p, index) => `
-        <li style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
-            <div style="display:flex; align-items:center; gap:16px;">
-                <span style="color:var(--text-tertiary); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.2rem;">#${index+1}</span>
-                <span style="color:var(--text-primary); font-family:'Inter',sans-serif; font-weight:600; font-size:1.1rem;">${p.name}</span>
+    const half = Math.ceil(allPlayers.length / 2);
+    const leftCol = allPlayers.slice(0, half);
+    const rightCol = allPlayers.slice(half);
+    
+    function renderCard(players, startIndex, title) {
+        return `
+        <div style="background: linear-gradient(145deg, rgba(25,25,28,0.95) 0%, rgba(15,15,17,0.98) 100%); border: 1px solid rgba(232,93,58,0.12); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; height: 100%;">
+            <div style="position: relative; padding: 14px 24px 10px; text-align: center; flex-shrink: 0;">
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, ${rustColor}88, transparent);"></div>
+                <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: ${rustColor}; margin: 0; letter-spacing: 4px;">${title}</h3>
             </div>
-            <span style="color:var(--rust-orange); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.2rem;">${p.ticks}</span>
-        </li>
-    `).join('');
+            <div style="padding: 12px 0 24px; display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;">
+                ${players.map((p, i) => `
+                    <div class="${(startIndex === 0 && i === 0) ? 'first-place-glow' : (startIndex === 0 && i === 1) ? 'second-place-glow' : (startIndex === 0 && i === 2) ? 'third-place-glow' : ''}" style="display:flex; justify-content:space-between; align-items:center; padding:9px 18px; border-bottom:${i === players.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.04)'}; transition: background 0.2s;" onmouseover="this.style.background='${(startIndex === 0 && i === 0) ? 'rgba(255,215,0,0.1)' : (startIndex === 0 && i === 1) ? 'rgba(192,192,192,0.1)' : (startIndex === 0 && i === 2) ? 'rgba(205,127,50,0.1)' : 'rgba(232,93,58,0.04)'}'" onmouseout="this.style.background='${(startIndex === 0 && i === 0) ? 'rgba(255,215,0,0.05)' : (startIndex === 0 && i === 1) ? 'rgba(192,192,192,0.05)' : (startIndex === 0 && i === 2) ? 'rgba(205,127,50,0.05)' : 'transparent'}'">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span class="rank-number" style="color:var(--text-tertiary); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; width:26px; text-align:center;">#${startIndex + i + 1}</span>
+                            <div class="avatar-circle" style="width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg, ${rustColor}, ${rustColor}88); display:flex; align-items:center; justify-content:center; font-size:0.65rem; color:#fff; font-weight:700; font-family:'Inter',sans-serif; flex-shrink:0;">${p.name.charAt(0)}</div>
+                            <span class="player-name" style="color:var(--text-primary); font-family:'Rajdhani',sans-serif; font-weight:600; font-size:1rem;">${p.name}</span>
+                        </div>
+                        <span class="score-text" style="color:${rustColor}; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.1rem;">${p.ticks}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>`;
+    }
+    globalList.innerHTML = renderCard(leftCol, 0, `1 - ${leftCol.length}`) + renderCard(rightCol, half, `${half + 1} - ${half + rightCol.length}`);
+}
+
+// Initial Load for Activity
+GithubDB.getFile().then(db => {
+    if(typeof renderActivityFrontend === 'function') renderActivityFrontend(db.content);
+    if(document.getElementById('adminpanel') && document.getElementById('adminpanel').style.display !== 'none') {
+        if(typeof loadAdminActivity === 'function') loadAdminActivity(db.content);
+    }
+}).catch(e => console.error(e));
+
+function filterAdminActivity() {
+    const input = document.getElementById('adminSearchInput');
+    if (!input) return;
+    const filter = input.value.toLowerCase();
+    const list = document.getElementById('adminActivityList');
+    if (!list) return;
+    const items = list.getElementsByClassName('activity-player-item');
+    
+    for (let i = 0; i < items.length; i++) {
+        const playerName = items[i].getElementsByTagName('span')[0].textContent.toLowerCase();
+        if (playerName.indexOf(filter) > -1) {
+            items[i].style.opacity = "1";
+            items[i].style.pointerEvents = "auto";
+            items[i].style.filter = "none";
+        } else {
+            items[i].style.opacity = "0.15";
+            items[i].style.pointerEvents = "none";
+            items[i].style.filter = "grayscale(100%) blur(1px)";
+        }
+    }
 }
