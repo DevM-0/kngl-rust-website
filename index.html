@@ -36,6 +36,9 @@
                 </a>
                 <a href="#klipler" class="nav-link" data-text="Klipler">
                     <span>Klipler</span>
+                </a>
+                <a href="#aktiflik" class="nav-link" data-text="Aktiflik">
+                    <span>Aktiflik</span>
                     <div class="nav-link-glow"></div>
                 </a>
                 <a href="#kurallar" class="nav-link" data-text="Kurallar">
@@ -197,6 +200,41 @@
         </div>
     </section>
 
+    <!-- Activity Section -->
+    <section class="section" id="aktiflik" style="position: relative; padding-top: 100px; padding-bottom: 10px; min-height: 100vh;">
+        <div class="container">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                <div>
+                    <span class="section-tag">AKTİFLİK</span>
+                    <h2 class="section-title">Aktiflik Listesi</h2>
+                </div>
+                <div>
+                    <button id="toggleActivityViewBtn" onclick="toggleActivityView()" style="color: var(--rust-orange); background: transparent; text-decoration: none; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 1px; padding: 10px 24px; border: 1px solid var(--rust-orange); border-radius: 8px; transition: all 0.3s; cursor: pointer; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='var(--rust-orange)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--rust-orange)'">GENEL SIRALAMA</button>
+                </div>
+            </div>
+
+            <!-- Teams View (Default) -->
+            <div id="activityTeamsView" class="activity-view view-enter">
+                <div class="teams-grid" id="activityTeamsGrid">
+                    <!-- Loaded by JS -->
+                </div>
+            </div>
+
+            <!-- Global Leaderboard View (Hidden) -->
+            <div id="activityGlobalView" class="activity-view" style="display: none;">
+                <div class="team-card" style="padding: 0; max-width: 600px; margin: 0 auto;">
+                    <ul class="team-members-list" id="activityGlobalList" style="padding: 24px;">
+                        <!-- Loaded by JS -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div onclick="document.getElementById('kurallar').scrollIntoView({behavior:'smooth'});" style="cursor:pointer; text-align: center; margin-top: 40px; padding-bottom: 10px;">
+            <span style="font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #555; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 6px;">Aşağı Kaydır</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" style="animation: bounce 2s infinite;"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </div>
+    </section>
+
     <!-- Rules Section -->
     <section class="section section-alt" id="kurallar" style="padding-top: 100px; min-height: 100vh;">
         <div class="container">
@@ -274,6 +312,7 @@
                 <button onclick="switchAdminTab('pending')" id="tabPending" style="padding:12px 24px; background:none; border:none; border-bottom:2px solid transparent; color:var(--text-tertiary); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; cursor:pointer; letter-spacing:1px; transition:all 0.3s;">ONAY BEKLEYENLER</button>
                 <button onclick="switchAdminTab('users')" id="tabUsers" style="padding:12px 24px; background:none; border:none; border-bottom:2px solid transparent; color:var(--text-tertiary); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; cursor:pointer; letter-spacing:1px; transition:all 0.3s; display:none;">KULLANICILAR</button>
                 <button onclick="switchAdminTab('notification')" id="tabNotification" style="padding:12px 24px; background:none; border:none; border-bottom:2px solid transparent; color:var(--text-tertiary); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; cursor:pointer; letter-spacing:1px; transition:all 0.3s;">BİLDİRİM</button>
+                <button onclick="switchAdminTab('activity')" id="tabActivity" style="padding:12px 24px; background:none; border:none; border-bottom:2px solid transparent; color:var(--text-tertiary); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1rem; cursor:pointer; letter-spacing:1px; transition:all 0.3s;">AKTİFLİK</button>
             </div>
 
             <!-- Notification Tab -->
@@ -317,12 +356,24 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <div>
-                        <h3 style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.1rem; color:var(--text-primary); display:inline-block; margin-right:12px;">Son Klipler</h3>
-                        <span id="adminClipCount" style="font-family:'Rajdhani',sans-serif; font-weight:600; color:var(--text-tertiary); font-size:0.85rem;"></span>
-                    </div>
-                    <button onclick="window.location.href='admin-clips.html'" style="padding:6px 16px; background:rgba(255,255,255,0.05); color:var(--text-primary); border:1px solid rgba(255,255,255,0.1); border-radius:6px; font-family:'Rajdhani',sans-serif; font-weight:600; font-size:0.85rem; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Tümünü Yönet →</button>
-                </div>
                 <div id="adminClipsList"></div>
+            </div>
+
+            <!-- Activity Tab -->
+            <div id="adminActivityTab" style="display:none;">
+                <div style="background:rgba(20,20,22,0.4); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:24px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h3 style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.2rem; margin-bottom:8px; color:var(--text-primary);">Yoklama Kontrolü</h3>
+                        <p style="color:var(--text-tertiary); font-family:'Inter',sans-serif; font-size:0.85rem; margin:0;">Tüm oyuncuların aktiflik durumu. Yeni turda tikleri sıfırlayarak kimlerin kontrol edildiğini görebilirsin.</p>
+                    </div>
+                    <button onclick="resetActivityCheck()" style="padding:10px 24px; background:linear-gradient(135deg, var(--rust-orange) 0%, var(--rust-red) 100%); color:white; border:none; border-radius:8px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.3s;">YENİ YOKLAMA BAŞLAT</button>
+                </div>
+                
+                <div class="team-card" style="padding:0;">
+                    <ul class="team-members-list" id="adminActivityList" style="padding:24px;">
+                        <!-- JS renders users here -->
+                    </ul>
+                </div>
             </div>
 
             <!-- Pending Tab -->
