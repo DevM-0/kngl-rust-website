@@ -997,7 +997,7 @@ function showAdminDashboard() {
 }
 
 function switchAdminTab(tab) {
-    const tabs = ['clips', 'pending', 'users', 'notification'];
+    const tabs = ['clips', 'pending', 'users', 'notification', 'activity'];
     tabs.forEach(t => {
         const tabEl = document.getElementById('admin' + t.charAt(0).toUpperCase() + t.slice(1) + 'Tab');
         const btnEl = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
@@ -1443,6 +1443,9 @@ async function checkForUpdates() {
             // Eğer admin panelindeyse
             if (document.getElementById('adminpanel') && document.getElementById('adminpanel').style.display !== 'none') {
                 if(typeof loadAdminClips === 'function') loadAdminClips();
+                if(typeof loadAdminActivity === 'function') loadAdminActivity(db.content);
+            }
+            if(typeof renderActivityFrontend === 'function') renderActivityFrontend(db.content);
                 if(typeof loadAdminPendingClips === 'function') loadAdminPendingClips();
                 if (adminUser && adminUser.role === 'owner' && typeof loadAdminUsers === 'function') loadAdminUsers();
             }
@@ -1459,3 +1462,142 @@ async function checkForUpdates() {
 setInterval(checkForUpdates, 10000);
 setTimeout(checkForUpdates, 2000); // İlk kontrolü 2sn sonra yap
 
+
+// ========================
+// ACTIVITY (AKT�FL�K) LOGIC
+// ========================
+let currentActivitySession = new Set();
+let isGlobalActivityView = false;
+
+function toggleActivityView() {
+    isGlobalActivityView = !isGlobalActivityView;
+    const btn = document.getElementById('toggleActivityViewBtn');
+    const teamsView = document.getElementById('activityTeamsView');
+    const globalView = document.getElementById('activityGlobalView');
+    
+    if (isGlobalActivityView) {
+        btn.innerText = 'TAKIMLARA D�N';
+        teamsView.classList.replace('view-enter', 'view-exit');
+        setTimeout(() => {
+            teamsView.style.display = 'none';
+            globalView.style.display = 'block';
+            setTimeout(() => globalView.classList.add('view-enter'), 50);
+        }, 400);
+    } else {
+        btn.innerText = 'GENEL SIRALAMA';
+        globalView.classList.remove('view-enter');
+        setTimeout(() => {
+            globalView.style.display = 'none';
+            teamsView.style.display = 'block';
+            setTimeout(() => teamsView.classList.replace('view-exit', 'view-enter'), 50);
+        }, 400);
+    }
+}
+
+function loadAdminActivity(dbContent) {
+    const list = document.getElementById('adminActivityList');
+    if (!list) return;
+    
+    // Sort all players alphabetically
+    let allPlayers = [];
+    TEAMS.forEach(t => {
+        t.members.forEach(m => {
+            allPlayers.push(m);
+        });
+    });
+    allPlayers.sort();
+    
+    const activityData = dbContent.activity || {};
+    
+    list.innerHTML = allPlayers.map(player => {
+        const ticks = activityData[player] || 0;
+        const isTicked = currentActivitySession.has(player);
+        return `
+            <li class="activity-player-item">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.1rem; color:var(--text-primary);">${player}</span>
+                    <span class="tick-badge">${ticks}</span>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    ${isTicked ? 
+                        `<button onclick="addActivityTick('${player}', -1)" class="admin-tick-btn" style="background:rgba(231,76,60,0.2); border-color:#e74c3c; color:#e74c3c;">-1 Geri Al</button>
+                         <button class="admin-tick-btn ticked" disabled>EKLEND� ?</button>` : 
+                        `<button onclick="addActivityTick('${player}', 1)" class="admin-tick-btn">+1 Yoklama Al</button>`
+                    }
+                </div>
+            </li>
+        `;
+    }).join('');
+}
+
+async function addActivityTick(player, increment) {
+    try {
+        const db = await GithubDB.getFile();
+        if (!db.content.activity) db.content.activity = {};
+        
+        let current = db.content.activity[player] || 0;
+        db.content.activity[player] = Math.max(0, current + increment);
+        
+        if (increment > 0) {
+            currentActivitySession.add(player);
+        } else {
+            currentActivitySession.delete(player);
+        }
+        
+        await GithubDB.saveFile(db.content, db.sha);
+        loadAdminActivity(db.content);
+        renderActivityFrontend(db.content);
+    } catch(e) {
+        showToast('Hata: ' + e.message, 'error');
+    }
+}
+
+function resetActivityCheck() {
+    currentActivitySession.clear();
+    GithubDB.getFile().then(db => loadAdminActivity(db.content));
+    showToast('Yoklama listesi s�f�rland�. Yeni tura ba�layabilirsiniz.', 'success');
+}
+
+function renderActivityFrontend(dbContent) {
+    const teamsGrid = document.getElementById('activityTeamsGrid');
+    const globalList = document.getElementById('activityGlobalList');
+    if (!teamsGrid || !globalList) return;
+    
+    const activityData = dbContent.activity || {};
+    
+    // Render Teams (only first 4 teams as requested)
+    const activeTeams = TEAMS.slice(0, 4);
+    teamsGrid.innerHTML = activeTeams.map(team => {
+        // Sort members by tick count descending
+        let sortedMembers = [...team.members].sort((a, b) => (activityData[b]||0) - (activityData[a]||0));
+        
+        return `
+        <div class="team-card">
+            <h3 class="team-name" style="margin-bottom:16px;">${team.name}</h3>
+            <ul class="team-members-list">
+                ${sortedMembers.map(m => `
+                    <li style="display:flex; justify-content:space-between;">
+                        <span>${m}</span>
+                        <span style="color:var(--rust-orange); font-weight:700;">${activityData[m]||0}</span>
+                    </li>
+                `).join('')}
+            </ul>
+        </div>
+        `;
+    }).join('');
+    
+    // Render Global Leaderboard
+    let allPlayers = [];
+    TEAMS.forEach(t => t.members.forEach(m => allPlayers.push({name: m, ticks: activityData[m]||0})));
+    allPlayers.sort((a, b) => b.ticks - a.ticks); // Descending by ticks
+    
+    globalList.innerHTML = allPlayers.map((p, index) => `
+        <li style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <span style="color:var(--text-tertiary); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.2rem;">#${index+1}</span>
+                <span style="color:var(--text-primary); font-family:'Inter',sans-serif; font-weight:600; font-size:1.1rem;">${p.name}</span>
+            </div>
+            <span style="color:var(--rust-orange); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.2rem;">${p.ticks}</span>
+        </li>
+    `).join('');
+}
