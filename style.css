@@ -1892,7 +1892,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
+    padding: 6px 12px;
     background: rgba(255,255,255,0.02);
     border: 1px solid rgba(255,255,255,0.05);
     border-radius: 8px;
@@ -1914,13 +1914,19 @@ body {
     box-shadow: 0 0 10px rgba(205, 65, 43, 0.4);
 }
 .admin-tick-btn {
-    padding: 6px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 12px;
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
     color: var(--text-primary);
     border-radius: 6px;
     font-family: 'Rajdhani', sans-serif;
     font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
     cursor: pointer;
     transition: all 0.3s;
 }
@@ -1932,3 +1938,120 @@ body {
     border-color: #2ecc71;
     color: white;
 }
+.admin-tick-btn:active {
+    transform: scale(0.92);
+}
+
+
+/* Activity view transitions */
+#activityTeamsView, #activityGlobalView {
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+/* Activity teams grid - 2x2 on desktop */
+
+
+/* Global leaderboard 2 column */
+
+
+@media (max-width: 768px) {
+    
+    
+}
+
+
+/* Activity layout responsive */
+@media (max-width: 900px) {
+    #activityMainLayout {
+        grid-template-columns: 1fr !important;
+    }
+    #activityTeamsGrid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+#aktiflik .container, #adminpanel .container {
+    max-width: 1800px;
+    width: 95%;
+}
+
+/* Podium Glow Effects */
+
+/* 1st Place (Gold) */
+@keyframes goldPulse {
+    0% { background: rgba(255, 215, 0, 0.05); box-shadow: inset 0 0 10px rgba(255, 215, 0, 0); }
+    50% { background: rgba(255, 215, 0, 0.15); box-shadow: inset 0 0 25px rgba(255, 215, 0, 0.15); }
+    100% { background: rgba(255, 215, 0, 0.05); box-shadow: inset 0 0 10px rgba(255, 215, 0, 0); }
+}
+
+@keyframes crownBounce {
+    0%, 100% { transform: translateY(0) rotate(15deg) scale(1); filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4)); }
+    50% { transform: translateY(-5px) rotate(5deg) scale(1.1); filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8)); }
+}
+
+.first-place-glow {
+    animation: goldPulse 2s infinite ease-in-out !important;
+    border-radius: 10px;
+    position: relative;
+    z-index: 3;
+    border-bottom: none !important;
+    margin: 2px 4px;
+}
+
+.first-place-glow::after {
+    content: '\265B'; /* Solid single-color crown (Chess Queen) */
+    position: absolute;
+    left: -8px;
+    top: -10px;
+    font-size: 1.3rem;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    animation: crownBounce 2s infinite ease-in-out;
+}
+
+.first-place-glow .rank-number { color: #ffd700 !important; text-shadow: 0 0 10px rgba(255, 215, 0, 0.6) !important; font-size: 1.1rem !important; }
+.first-place-glow .avatar-circle { background: linear-gradient(135deg, #ffd700, #b8860b) !important; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5) !important; color: #000 !important; }
+.first-place-glow .score-text { color: #ffd700 !important; text-shadow: 0 0 12px rgba(255, 215, 0, 0.8) !important; font-size: 1.3rem !important; }
+.first-place-glow .player-name { color: #ffd700 !important; text-shadow: 0 0 10px rgba(255, 215, 0, 0.4) !important; }
+
+/* 2nd Place (Silver) */
+@keyframes silverPulse {
+    0% { background: rgba(192, 192, 192, 0.05); box-shadow: inset 0 0 10px rgba(192, 192, 192, 0); }
+    50% { background: rgba(192, 192, 192, 0.12); box-shadow: inset 0 0 20px rgba(192, 192, 192, 0.12); }
+    100% { background: rgba(192, 192, 192, 0.05); box-shadow: inset 0 0 10px rgba(192, 192, 192, 0); }
+}
+
+.second-place-glow {
+    animation: silverPulse 2.2s infinite ease-in-out !important;
+    border-radius: 10px;
+    position: relative;
+    z-index: 2;
+    border-bottom: none !important;
+    margin: 2px 4px;
+}
+
+.second-place-glow .rank-number { color: #e0e0e0 !important; text-shadow: 0 0 10px rgba(192, 192, 192, 0.5) !important; font-size: 1.05rem !important; }
+.second-place-glow .avatar-circle { background: linear-gradient(135deg, #e0e0e0, #888) !important; box-shadow: 0 0 12px rgba(192, 192, 192, 0.4) !important; color: #000 !important; }
+.second-place-glow .score-text { color: #e0e0e0 !important; text-shadow: 0 0 10px rgba(192, 192, 192, 0.6) !important; font-size: 1.2rem !important; }
+.second-place-glow .player-name { color: #e0e0e0 !important; text-shadow: 0 0 8px rgba(192, 192, 192, 0.3) !important; }
+
+/* 3rd Place (Bronze) */
+@keyframes bronzePulse {
+    0% { background: rgba(205, 127, 50, 0.05); box-shadow: inset 0 0 10px rgba(205, 127, 50, 0); }
+    50% { background: rgba(205, 127, 50, 0.12); box-shadow: inset 0 0 20px rgba(205, 127, 50, 0.12); }
+    100% { background: rgba(205, 127, 50, 0.05); box-shadow: inset 0 0 10px rgba(205, 127, 50, 0); }
+}
+
+.third-place-glow {
+    animation: bronzePulse 2.4s infinite ease-in-out !important;
+    border-radius: 10px;
+    position: relative;
+    z-index: 1;
+    border-bottom: none !important;
+    margin: 2px 4px;
+}
+
+.third-place-glow .rank-number { color: #cd7f32 !important; text-shadow: 0 0 10px rgba(205, 127, 50, 0.5) !important; font-size: 1.05rem !important; }
+.third-place-glow .avatar-circle { background: linear-gradient(135deg, #cd7f32, #8b4513) !important; box-shadow: 0 0 12px rgba(205, 127, 50, 0.4) !important; color: #fff !important; }
+.third-place-glow .score-text { color: #cd7f32 !important; text-shadow: 0 0 10px rgba(205, 127, 50, 0.6) !important; font-size: 1.2rem !important; }
+.third-place-glow .player-name { color: #cd7f32 !important; text-shadow: 0 0 8px rgba(205, 127, 50, 0.3) !important; }
