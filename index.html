@@ -201,31 +201,23 @@
     </section>
 
     <!-- Activity Section -->
-    <section class="section" id="aktiflik" style="position: relative; padding-top: 100px; padding-bottom: 10px; min-height: 100vh;">
+    <section class="section" id="aktiflik" style="position: relative; padding-top: 80px; padding-bottom: 80px; min-height: 100vh;">
         <div class="container">
-            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
-                <div>
-                    <span class="section-tag">AKTİFLİK</span>
-                    <h2 class="section-title">Aktiflik Listesi</h2>
-                </div>
-                <div>
-                    <button id="toggleActivityViewBtn" onclick="toggleActivityView()" style="color: var(--rust-orange); background: transparent; text-decoration: none; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 1px; padding: 10px 24px; border: 1px solid var(--rust-orange); border-radius: 8px; transition: all 0.3s; cursor: pointer; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='var(--rust-orange)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--rust-orange)'">GENEL SIRALAMA</button>
-                </div>
-            </div>
 
-            <!-- Teams View (Default) -->
-            <div id="activityTeamsView" class="activity-view view-enter">
-                <div class="teams-grid" id="activityTeamsGrid">
-                    <!-- Loaded by JS -->
-                </div>
-            </div>
-
-            <!-- Global Leaderboard View (Hidden) -->
-            <div id="activityGlobalView" class="activity-view" style="display: none;">
-                <div class="team-card" style="padding: 0; max-width: 600px; margin: 0 auto;">
-                    <ul class="team-members-list" id="activityGlobalList" style="padding: 24px;">
+            <div id="activityMainLayout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: stretch;">
+                <!-- Left: General Leaderboard -->
+                <div style="display: flex; flex-direction: column;">
+                    <h3 style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:#fff; letter-spacing:4px; margin-bottom:20px; text-align:center; text-shadow: 0 0 20px rgba(255,255,255,0.2);">GENEL SIRALAMA</h3>
+                    <div id="activityGlobalList" style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; flex-grow: 1;">
                         <!-- Loaded by JS -->
-                    </ul>
+                    </div>
+                </div>
+                <!-- Right: Team Cards 2x2 -->
+                <div style="display: flex; flex-direction: column;">
+                    <h3 style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:#fff; letter-spacing:4px; margin-bottom:20px; text-align:center; text-shadow: 0 0 20px rgba(255,255,255,0.2);">TAKIM SIRALAMASI</h3>
+                    <div id="activityTeamsGrid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; flex-grow: 1;">
+                        <!-- Loaded by JS -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -301,10 +293,6 @@
     <!-- Admin Panel Section (normal section - aynı tasarım) -->
     <section class="section" id="adminpanel" style="display:none; padding-top: 100px; min-height: 100vh;">
         <div class="container">
-            <div class="section-header">
-                <span class="section-tag">YÖNETİM</span>
-                <h2 class="section-title">Admin Paneli</h2>
-            </div>
 
             <!-- Tabs -->
             <div style="display:flex; gap:4px; margin-bottom:28px; border-bottom:1px solid rgba(255,255,255,0.08);">
@@ -356,23 +344,32 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <div>
+                        <h3 style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.1rem; color:var(--text-primary); display:inline-block; margin-right:12px;">Mevcut Klipler</h3>
+                        <span id="adminClipCount" style="font-family:'Rajdhani',sans-serif; font-weight:600; color:var(--text-tertiary); font-size:0.85rem;"></span>
+                    </div>
+                </div>
                 <div id="adminClipsList"></div>
             </div>
 
             <!-- Activity Tab -->
             <div id="adminActivityTab" style="display:none;">
-                <div style="background:rgba(20,20,22,0.4); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:24px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="background: linear-gradient(145deg, rgba(25,25,28,0.95) 0%, rgba(15,15,17,0.98) 100%); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <div>
-                        <h3 style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.2rem; margin-bottom:8px; color:var(--text-primary);">Yoklama Kontrolü</h3>
-                        <p style="color:var(--text-tertiary); font-family:'Inter',sans-serif; font-size:0.85rem; margin:0;">Tüm oyuncuların aktiflik durumu. Yeni turda tikleri sıfırlayarak kimlerin kontrol edildiğini görebilirsin.</p>
+                        <h3 style="font-family:'Bebas Neue',sans-serif; font-size:1.6rem; margin-bottom:4px; color:var(--rust-orange); letter-spacing:2px;">Yoklama Kontrolü</h3>
+                        <p style="color:var(--text-tertiary); font-family:'Inter',sans-serif; font-size:0.85rem; margin:0;">Tüm oyuncuların aktiflik durumu. Aramak istediğiniz oyuncuyu filtreleyebilirsiniz.</p>
                     </div>
-                    <button onclick="resetActivityCheck()" style="padding:10px 24px; background:linear-gradient(135deg, var(--rust-orange) 0%, var(--rust-red) 100%); color:white; border:none; border-radius:8px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.3s;">YENİ YOKLAMA BAŞLAT</button>
+                    <div style="display:flex; gap:16px; align-items:center;">
+                        <div style="position:relative;">
+                            <input type="text" id="adminSearchInput" onkeyup="filterAdminActivity()" placeholder="Oyuncu Ara..." style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 16px 8px 40px; color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 0.9rem; width: 180px; outline: none; transition: border-color 0.3s;">
+                            <svg style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; fill:rgba(255,255,255,0.4);" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                        </div>
+                        <button onclick="saveActivityCheck()" style="padding:8px 20px; background:linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color:white; border:none; border-radius:8px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.3s;">SEÇİMLERİ KAYDET</button>
+                        <button onclick="resetActivityTable()" style="padding:8px 20px; background:linear-gradient(135deg, var(--rust-orange) 0%, var(--rust-red) 100%); color:white; border:none; border-radius:8px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.3s;">TABLOYU SIFIRLA</button>
+                    </div>
                 </div>
                 
-                <div class="team-card" style="padding:0;">
-                    <ul class="team-members-list" id="adminActivityList" style="padding:24px;">
-                        <!-- JS renders users here -->
-                    </ul>
+                <div id="adminActivityList" style="padding:0;">
+                    <!-- JS renders users here -->
                 </div>
             </div>
 
