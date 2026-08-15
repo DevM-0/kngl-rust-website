@@ -174,5 +174,8 @@
     "duration": 3,
     "timestamp": 1786802926947
   },
-  "activity": {}
+  "activity": {
+    "MALİK": 1,
+    "ORDER": 1
+  }
 }
