@@ -173,5 +173,8 @@
     "message": "SA",
     "duration": 3,
     "timestamp": 1786802926947
+  },
+  "activity": {
+    "KF": 1
   }
 }
