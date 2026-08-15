@@ -621,8 +621,7 @@ async function fetchAndRenderMainStreamers() {
 // ========================
 // TIMER LOGIC
 // ========================
-/*
-// Eski Geçen Süre Sayacı (Şimdilik gizli/iptal edildi)
+// Eski Geçen Süre Sayacı (yeniden aktif edildi)
 function startElapsedTimer() {
     // Event started: 10 August 2026, 22:10 (Turkey time UTC+3)
     const eventStart = new Date('2026-08-10T22:10:00+03:00');
@@ -655,7 +654,7 @@ function startElapsedTimer() {
     updateTimer();
     setInterval(updateTimer, 1000);
 }
-*/
+
 
 function startCountdownTimer() {
     // Target date: 14 August 2026, 23:00 (Turkey time UTC+3)
@@ -698,8 +697,8 @@ function startCountdownTimer() {
 }
 
 // Start timer when page loads
-// startElapsedTimer();
-startCountdownTimer();
+startElapsedTimer();
+// startCountdownTimer();
 
 // ========================
 // CARD HOVER ANIMATIONS
