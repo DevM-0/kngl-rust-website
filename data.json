@@ -174,10 +174,5 @@
     "duration": 3,
     "timestamp": 1786802926947
   },
-  "activity": {
-    "ERAY": 1,
-    "AHMET": 2,
-    "ALİ": 1,
-    "HOBBİT": 3
-  }
+  "activity": {}
 }
