@@ -214,7 +214,15 @@
                 </div>
                 <!-- Right: Team Cards 2x2 -->
                 <div style="display: flex; flex-direction: column;">
-                    <h3 style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:#fff; letter-spacing:4px; margin-bottom:20px; text-align:center; text-shadow: 0 0 20px rgba(255,255,255,0.2);">TAKIM SIRALAMASI</h3>
+                    <div style="position: relative; margin-bottom:20px;">
+                        <h3 style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:#fff; letter-spacing:4px; text-align:center; text-shadow: 0 0 20px rgba(255,255,255,0.2); margin:0;">TAKIM SIRALAMASI</h3>
+                        <div class="info-tooltip" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; z-index: 50;">
+                            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-tertiary); transition: color 0.3s;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            <div class="tooltip-content" style="position:absolute; right:0; top:calc(100% + 10px); width:320px; background:rgba(15,15,17,0.95); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px; font-family:'Inter',sans-serif; font-size:0.85rem; color:var(--text-secondary); line-height:1.5; z-index:100; opacity:0; visibility:hidden; transition:all 0.3s; box-shadow:0 10px 30px rgba(0,0,0,0.5); pointer-events:none; backdrop-filter:blur(10px); font-weight: 500;">
+                                Bu Sıralama GECE ( 01:00 - 03:00 ) SABAH (12:00 - 17:00 ) AKŞAM (19:00 - 21:00) ' da takım povlarındaki aktif sayısına bakarak yapılmıştır.
+                            </div>
+                        </div>
+                    </div>
                     <div id="activityTeamsGrid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; flex-grow: 1;">
                         <!-- Loaded by JS -->
                     </div>
