@@ -174,5 +174,7 @@
     "duration": 3,
     "timestamp": 1786802926947
   },
-  "activity": {}
+  "activity": {
+    "ERAY": 1
+  }
 }
