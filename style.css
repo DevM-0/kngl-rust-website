@@ -2055,3 +2055,11 @@ body {
 .third-place-glow .avatar-circle { background: linear-gradient(135deg, #cd7f32, #8b4513) !important; box-shadow: 0 0 12px rgba(205, 127, 50, 0.4) !important; color: #fff !important; }
 .third-place-glow .score-text { color: #cd7f32 !important; text-shadow: 0 0 10px rgba(205, 127, 50, 0.6) !important; font-size: 1.2rem !important; }
 .third-place-glow .player-name { color: #cd7f32 !important; text-shadow: 0 0 8px rgba(205, 127, 50, 0.3) !important; }
+.info-tooltip:hover .tooltip-content {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(5px);
+}
+.info-tooltip svg:hover {
+    color: var(--rust-orange) !important;
+}
