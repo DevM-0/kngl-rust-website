@@ -248,6 +248,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        if (window.lastSection !== current) {
+            if (current === 'aktiflik') {
+                if (typeof showAktiflikInfoCard === 'function') showAktiflikInfoCard();
+            } else if (window.lastSection === 'aktiflik') {
+                if (typeof hideAktiflikInfoCard === 'function') hideAktiflikInfoCard();
+            }
+            window.lastSection = current;
+        }
+
         navItems.forEach(a => {
             a.classList.remove('active');
             if (a.getAttribute('href').includes(current)) {
@@ -1741,5 +1750,36 @@ function filterAdminActivity() {
             items[i].style.pointerEvents = "none";
             items[i].style.filter = "grayscale(100%) blur(1px)";
         }
+    }
+}
+
+// --- Aktiflik Info Card (Toast) ---
+function showAktiflikInfoCard() {
+    let card = document.getElementById('aktiflikInlineCard');
+    if (!card) return;
+    
+    if (window.aktiflikInfoTimeout) clearTimeout(window.aktiflikInfoTimeout);
+    if (window.aktiflikShowTimeout) clearTimeout(window.aktiflikShowTimeout);
+
+    // Wait 600ms for smooth scroll to finish before animating in
+    window.aktiflikShowTimeout = setTimeout(() => {
+        card.style.visibility = 'visible';
+        card.style.opacity = '1';
+        card.style.transform = 'translateX(0)';
+
+        // Auto-hide after 10 seconds
+        window.aktiflikInfoTimeout = setTimeout(() => {
+            hideAktiflikInfoCard();
+        }, 10000);
+    }, 600);
+}
+
+function hideAktiflikInfoCard() {
+    if (window.aktiflikShowTimeout) clearTimeout(window.aktiflikShowTimeout);
+    const card = document.getElementById('aktiflikInlineCard');
+    if (card) {
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(20px)';
+        setTimeout(() => { card.style.visibility = 'hidden'; }, 500);
     }
 }
