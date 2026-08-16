@@ -84,62 +84,13 @@ const GithubDB = {
 
 const TEAMS = [
     {
-        id: 1, name: 'TAKIM 1', color: '#3498db',
-        members: ['DİZCİ', 'HÜSAM', 'ORDER', 'MALİK', 'SAMET'],
-        streamers: [
-            { name: 'DİZCİ', slug: 'dizci' },
-            { name: 'HÜSAM', slug: 'husamviyuviyu' },
-            { name: 'ORDER', slug: 'order' },
-            { name: 'MALİK', slug: 'trinkles' },
-            { name: 'SAMET', slug: 'sametcagri' }
-        ]
-    },
-    {
-        id: 2, name: 'TAKIM 2', color: '#e74c3c',
-        members: ['HOBBİT', 'ÖMER', 'KADİR', 'KF', 'YİĞİT'],
-        streamers: [
-            { name: 'HOBBİT', slug: 'hobbitemo' },
-            { name: 'KADİR', slug: 'kadirdemir' },
-            { name: 'KF', slug: 'kfistaken' },
-            { name: 'YİĞİT', slug: 'yyiido' }
-        ]
-    },
-    {
-        id: 3, name: 'TAKIM 3', color: '#2ecc71',
-        members: ['MİNİK', 'ALİ', 'YUNUS', 'TEMBİK', 'EKREM'],
+        id: 1, name: 'TAKIM 3 - 6', color: '#2ecc71',
+        members: ['MİNİK', 'ALİ', 'YUNUS', 'TEMBİK', 'EKREM', 'MİELLA', 'FLOMORE', 'ÇAĞATAY', 'ERSİN', 'EBO'],
         streamers: [
             { name: 'MİNİK', slug: 'minik' },
             { name: 'ALİ', slug: 'alixmert' },
             { name: 'TEMBİK', slug: 'tembik' },
-            { name: 'EKREM', slug: 'ekremyaldizkaya' }
-        ]
-    },
-    {
-        id: 4, name: 'TAKIM 4', color: '#f1c40f',
-        members: ['ERAY', 'BARAN', 'AYBERK', 'ÇAÇA', 'AHMET'],
-        streamers: [
-            { name: 'ERAY', slug: 'eray' },
-            { name: 'BARAN', slug: 'baran' },
-            { name: 'AYBERK', slug: 'ayberk' },
-            { name: 'ÇAÇA', slug: 'caca' },
-            { name: 'AHMET', slug: 'ahmetturku' }
-        ]
-    },
-    {
-        id: 5, name: 'TAKIM 5', color: '#9b59b6',
-        members: ['SPYKS', 'FALCON', 'MUSTİ', 'BONE', 'VAULT'],
-        streamers: [
-            { name: 'SPYKS', slug: 'spyks26' },
-            { name: 'FALCON', slug: 'falconn2k' },
-            { name: 'MUSTİ', slug: 'starlordistaken' },
-            { name: 'BONE', slug: 'bonesaures' },
-            { name: 'VAULT', slug: 'vaultcreative' }
-        ]
-    },
-    {
-        id: 6, name: 'TAKIM 6', color: '#00e5ff',
-        members: ['MİELLA', 'FLOMORE', 'ÇAĞATAY', 'ERSİN', 'EBO'],
-        streamers: [
+            { name: 'EKREM', slug: 'ekremyaldizkaya' },
             { name: 'MİELLA', slug: 'm1ella' },
             { name: 'FLOMORE', slug: 'flomore' },
             { name: 'ÇAĞATAY', slug: 'cagatayakman' },
@@ -148,9 +99,14 @@ const TEAMS = [
         ]
     },
     {
-        id: 7, name: 'TAKIM 7', color: '#f39c12',
-        members: ['SERCAN', 'EFE', 'MURAT', 'ALP', 'MERT'],
+        id: 2, name: 'TAKIM 4 - 7', color: '#f1c40f',
+        members: ['ERAY', 'BARAN', 'AYBERK', 'ÇAÇA', 'AHMET', 'SERCAN', 'EFE', 'MURAT', 'ALP', 'MERT'],
         streamers: [
+            { name: 'ERAY', slug: 'eray' },
+            { name: 'BARAN', slug: 'baran' },
+            { name: 'AYBERK', slug: 'ayberk' },
+            { name: 'ÇAÇA', slug: 'caca' },
+            { name: 'AHMET', slug: 'ahmetturku' },
             { name: 'SERCAN', slug: 'sercanzurna' },
             { name: 'EFE', slug: 'efeuygac' },
             { name: 'MURAT', slug: 'muratkzlcn' },
@@ -159,9 +115,29 @@ const TEAMS = [
         ]
     },
     {
-        id: 8, name: 'TAKIM 8', color: '#ff66b2',
-        members: ['ABDÜ', 'BARIŞ', 'BEKİR', 'MAXERS', 'ARDA'],
+        id: 3, name: 'TAKIM 5 - 2', color: '#e74c3c',
+        members: ['SPYKS', 'FALCON', 'MUSTİ', 'BONE', 'VAULT', 'HOBBİT', 'ÖMER', 'KADİR', 'KF', 'YİĞİT'],
         streamers: [
+            { name: 'SPYKS', slug: 'spyks26' },
+            { name: 'FALCON', slug: 'falconn2k' },
+            { name: 'MUSTİ', slug: 'starlordistaken' },
+            { name: 'BONE', slug: 'bonesaures' },
+            { name: 'VAULT', slug: 'vaultcreative' },
+            { name: 'HOBBİT', slug: 'hobbitemo' },
+            { name: 'KADİR', slug: 'kadirdemir' },
+            { name: 'KF', slug: 'kfistaken' },
+            { name: 'YİĞİT', slug: 'yyiido' }
+        ]
+    },
+    {
+        id: 4, name: 'TAKIM 1 - 8', color: '#3498db',
+        members: ['DİZCİ', 'HÜSAM', 'ORDER', 'MALİK', 'SAMET', 'ABDÜ', 'BARIŞ', 'BEKİR', 'MAXERS', 'ARDA'],
+        streamers: [
+            { name: 'DİZCİ', slug: 'dizci' },
+            { name: 'HÜSAM', slug: 'husamviyuviyu' },
+            { name: 'ORDER', slug: 'order' },
+            { name: 'MALİK', slug: 'trinkles' },
+            { name: 'SAMET', slug: 'sametcagri' },
             { name: 'ABDÜ', slug: 'simitciabdu' },
             { name: 'BARIŞ', slug: 'barisytb' },
             { name: 'BEKİR', slug: 'bekirgedik' },
