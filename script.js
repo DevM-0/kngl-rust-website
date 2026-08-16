@@ -84,7 +84,7 @@ const GithubDB = {
 
 const TEAMS = [
     {
-        id: 1, name: 'TAKIM 3 - 6', color: '#2ecc71',
+        id: 1, name: 'TAKIM 1', color: '#2ecc71',
         members: ['MİNİK', 'ALİ', 'YUNUS', 'TEMBİK', 'EKREM', 'MİELLA', 'FLOMORE', 'ÇAĞATAY', 'ERSİN', 'EBO'],
         streamers: [
             { name: 'MİNİK', slug: 'minik' },
@@ -99,7 +99,7 @@ const TEAMS = [
         ]
     },
     {
-        id: 2, name: 'TAKIM 4 - 7', color: '#f1c40f',
+        id: 2, name: 'TAKIM 2', color: '#f1c40f',
         members: ['ERAY', 'BARAN', 'AYBERK', 'ÇAÇA', 'AHMET', 'SERCAN', 'EFE', 'MURAT', 'ALP', 'MERT'],
         streamers: [
             { name: 'ERAY', slug: 'eray' },
@@ -115,7 +115,7 @@ const TEAMS = [
         ]
     },
     {
-        id: 3, name: 'TAKIM 5 - 2', color: '#e74c3c',
+        id: 3, name: 'TAKIM 3', color: '#e74c3c',
         members: ['SPYKS', 'FALCON', 'MUSTİ', 'BONE', 'VAULT', 'HOBBİT', 'ÖMER', 'KADİR', 'KF', 'YİĞİT'],
         streamers: [
             { name: 'SPYKS', slug: 'spyks26' },
@@ -130,7 +130,7 @@ const TEAMS = [
         ]
     },
     {
-        id: 4, name: 'TAKIM 1 - 8', color: '#3498db',
+        id: 4, name: 'TAKIM 4', color: '#3498db',
         members: ['DİZCİ', 'HÜSAM', 'ORDER', 'MALİK', 'SAMET', 'ABDÜ', 'BARIŞ', 'BEKİR', 'MAXERS', 'ARDA'],
         streamers: [
             { name: 'DİZCİ', slug: 'dizci' },
