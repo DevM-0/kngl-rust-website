@@ -130,7 +130,7 @@ const TEAMS = [
         ]
     },
     {
-        id: 4, name: 'TAKIM 4', color: '#3498db',
+        id: 4, name: 'TAKIM 4', color: '#3498db', eliminated: true,
         members: ['DİZCİ', 'HÜSAM', 'ORDER', 'MALİK', 'SAMET', 'ABDÜ', 'BARIŞ', 'BEKİR', 'MAXERS', 'ARDA'],
         streamers: [
             { name: 'DİZCİ', slug: 'dizci' },
@@ -289,13 +289,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `).join('');
 
+            let eliminatedOverlay = '';
+            let cardBlurStyle = '';
+            
+            if (team.eliminated) {
+                // Premium eliminated overlay: dark red glass with a horizontal glowing banner
+                eliminatedOverlay = `
+                    <div style="position: absolute; inset: 0; background: rgba(15, 8, 8, 0.65); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 5; display: flex; align-items: center; justify-content: center; border-radius: 18px; pointer-events: none;">
+                        <div style="width: 100%; background: linear-gradient(90deg, transparent, rgba(205, 65, 43, 0.15), transparent); border-top: 1px solid rgba(205, 65, 43, 0.3); border-bottom: 1px solid rgba(205, 65, 43, 0.3); padding: 16px 0; text-align: center; box-shadow: 0 0 40px rgba(205, 65, 43, 0.1);">
+                            <span style="font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; color: #e85d3a; letter-spacing: 12px; text-shadow: 0 0 20px rgba(232, 93, 58, 0.6); margin-left: 12px; display: block;">ELIMINATED</span>
+                        </div>
+                    </div>
+                `;
+                // Dim the card content elegantly instead of using muddy grayscale
+                cardBlurStyle = 'opacity: 0.3; filter: saturate(0.5);';
+            }
+
             card.innerHTML = `
-                <div style="position: relative; padding: 12px 24px 8px; text-align: center; overflow: hidden;">
+                ${eliminatedOverlay}
+                <div style="position: relative; padding: 12px 24px 8px; text-align: center; overflow: hidden; transition: all 0.3s; ${cardBlurStyle}">
                     <div style="position: absolute; top: 0; right: 15px; font-family: 'Bebas Neue', sans-serif; font-size: 5rem; color: rgba(232,93,58,0.06); line-height: 1; pointer-events: none; user-select: none;">#${team.id}</div>
                     <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, ${rustColor}88, transparent);"></div>
                     <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem; color: ${rustColor}; margin: 0; letter-spacing: 4px; position: relative; z-index: 1; text-shadow: 0 0 30px ${rustColor}22;">${team.name}</h3>
                 </div>
-                <div style="padding: 6px 12px 10px; display: flex; flex-direction: column; gap: 2px;">
+                <div style="padding: 6px 12px 10px; display: flex; flex-direction: column; gap: 2px; transition: all 0.3s; ${cardBlurStyle}">
                     ${membersList}
                 </div>
             `;
@@ -1621,9 +1638,48 @@ function resetActivityTable() {
     });
 }
 
+async function toggleActivitySection() {
+    try {
+        const db = await GithubDB.getFile();
+        if (db.content.activityEnabled === undefined) {
+            db.content.activityEnabled = true;
+        }
+        db.content.activityEnabled = !db.content.activityEnabled;
+        
+        await GithubDB.saveFile(db.content, db.sha);
+        showToast(db.content.activityEnabled ? 'Aktiflik bölümü açıldı!' : 'Aktiflik bölümü kapatıldı!', 'success');
+        
+        renderActivityFrontend(db.content);
+    } catch (e) {
+        showToast('Hata: ' + e.message, 'error');
+    }
+}
+
 function renderActivityFrontend(dbContent) {
     const teamsGrid = document.getElementById('activityTeamsGrid');
     const globalList = document.getElementById('activityGlobalList');
+    
+    // Toggle UI based on activityEnabled state
+    const isEnabled = dbContent.activityEnabled !== false; // defaults to true
+    
+    const navLink = document.getElementById('navAktiflik');
+    if (navLink) navLink.style.display = isEnabled ? '' : 'none';
+    
+    const secAktiflik = document.getElementById('aktiflik');
+    if (secAktiflik) secAktiflik.style.display = isEnabled ? '' : 'none';
+    
+    // Update admin toggle button if it exists
+    const toggleBtn = document.getElementById('toggleActivityBtn');
+    if (toggleBtn) {
+        if (isEnabled) {
+            toggleBtn.textContent = 'AKTİFLİK KAPAT';
+            toggleBtn.style.background = 'linear-gradient(135deg, #f39c12 0%, #d35400 100%)';
+        } else {
+            toggleBtn.textContent = 'AKTİFLİK AÇ';
+            toggleBtn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
+        }
+    }
+    
     if (!teamsGrid || !globalList) return;
     
     const activityData = dbContent.activity || {};
