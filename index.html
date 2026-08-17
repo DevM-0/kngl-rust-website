@@ -37,7 +37,7 @@
                 <a href="#klipler" class="nav-link" data-text="Klipler">
                     <span>Klipler</span>
                 </a>
-                <a href="#aktiflik" class="nav-link" data-text="Aktiflik">
+                <a href="#aktiflik" class="nav-link" id="navAktiflik" data-text="Aktiflik">
                     <span>Aktiflik</span>
                     <div class="nav-link-glow"></div>
                 </a>
@@ -375,6 +375,7 @@
                             <input type="text" id="adminSearchInput" onkeyup="filterAdminActivity()" placeholder="Oyuncu Ara..." style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 16px 8px 40px; color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 0.9rem; width: 180px; outline: none; transition: border-color 0.3s;">
                             <svg style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; fill:rgba(255,255,255,0.4);" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                         </div>
+                        <button id="toggleActivityBtn" onclick="toggleActivitySection()" style="padding:8px 20px; background:linear-gradient(135deg, #f39c12 0%, #d35400 100%); color:white; border:none; border-radius:8px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.3s;">AKTİFLİK Kapat</button>
                         <button onclick="saveActivityCheck()" style="padding:8px 20px; background:linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color:white; border:none; border-radius:8px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.3s;">SEÇİMLERİ KAYDET</button>
                         <button onclick="resetActivityTable()" style="padding:8px 20px; background:linear-gradient(135deg, var(--rust-orange) 0%, var(--rust-red) 100%); color:white; border:none; border-radius:8px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.3s;">TABLOYU SIFIRLA</button>
                     </div>
